@@ -50,7 +50,7 @@ The area covered by the (t_{i}) form a 'partition' of the area of P, we can thus
 
     A(P) = sum( A(t_{i}), i ∈ [|0, n|] )
 
-With the area of the triangle being half of the sum of its base and height.
+With the area of the triangle being half of the product of its base and height.
 The base b_{i} is:
 
     b_{i} = |p_{i+1} - p_{i}|
@@ -61,9 +61,16 @@ The height h_{i} is:
     
 We find:
  
-    A(t_{i}) = (2 * |(p_{i+1} - p_{i})| + |(p_{i+1} + p_{i})|) / 4
+    A(t_{i}) = (|(p_{i+1} - p_{i})| * |(p_{i+1} + p_{i})|) / 2
     
 And thus:
 
-    A(P) = (2 * sum( |(p_{i+1} - p_{i})| ) + sum( |(p_{i+1} + p_{i})| )) / 4
-         = (2 * L(p) + sum( [|(p_{i+1} + p_{i})| )) / 4
+    A(P) = (1/2) * sum( |(p_{i+1} - p_{i})| * |(p_{i+1} + p_{i})| ))
+   
+Note that the above formula does not depend on the Euclidian metric used.
+In case of an L2 norm, we can simplify it like so:
+
+
+    A(P) = (1/2) * sum( sqrt( (p_{i+1}^{2} - p_{i}^{2})^{2}) )
+         = (1/2) * sum( |(p_{i+1}^{2} - p_{i}^{2})| )
+   
