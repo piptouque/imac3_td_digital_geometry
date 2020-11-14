@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/imac3_td_dg_TD1.dir/source/td1/main.cpp.o  -o imac3_td_dg_TD1  -lDGTal 

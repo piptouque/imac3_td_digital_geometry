@@ -1,0 +1,3 @@
+/home/binabik/Documents/projets_gite/imac/imac3_digital_geometry/build/CMakeFiles/rebuild_cache.dir
+/home/binabik/Documents/projets_gite/imac/imac3_digital_geometry/build/CMakeFiles/edit_cache.dir
+/home/binabik/Documents/projets_gite/imac/imac3_digital_geometry/build/CMakeFiles/imac3_td_dg_TD1.dir

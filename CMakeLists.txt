@@ -2,74 +2,33 @@ cmake_minimum_required(VERSION 3.6)
 
 project(imac3_td_dg)
 
-set(${PROJECT_NAME}_CXX_STANDARD 20)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/cmake)
+set(PROJECT_NAME  imac2_td_dg)
 
-set(IS_GNU OFF)
-set(IS_MSVC OFF)
-set(IS_CLANG OFF)
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(IS_GNU ON)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(IS_MSVC ON)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(IS_CLANG ON)
-endif ()
-
-if (CMAKE_BUILD_TYPE STREQUAL 'Release')
-    set(${PROJECT_NAME}_OPTIMISATION ON)
-else ()
-    set(${PROJECT_NAME}_OPTIMISATION OFF)
-endif ()
+include(SetProjectFlags)
+include(SetProjectDirectories)
 
 
-if (${IS_GNU} OR ${IS_CLANG})
-    if (${${PROJECT_NAME}_OPTIMISATION})
-        set(${PROJECT_NAME}_OPTIMISATION_LEVEL "-O3")
-    else ()
-        set(${PROJECT_NAME}_OPTIMISATION_LEVEL "")
-    endif ()
-    ## -Warray-bounds is clang-only I think?
-    set(${PROJECT_NAME}_CXX_FLAGS
-            "-fPIC \
-                -Werror \
-                -Wall -pedantic \
-                -Wextra -Wshadow -Wnon-virtual-dtor  -Warray-bounds \
-                -Wold-style-cast \
-                -Wimplicit-fallthrough=5 -Wconversion \
-                ${${PROJECT_NAME}_OPTIMISATION_LEVEL} \
-                "
-            )
-elseif (${IS_MSVC})
-    if (${${PROJECT_NAME}_OPTIMISATION})
-        set(${PROJECT_NAME}_OPTIMISATION_LEVEL "/O2")
-    else ()
-        set(${PROJECT_NAME}_OPTIMISATION_LEVEL "")
-    endif ()
-    set(${PROJECT_NAME}_CXX_FLAGS
-            " \
-                /EHsc \
-                /WX \
-                /W4 /w14640 /permissive \
-                /w14242 /w14254 /w14263 /w14265 /w14287 \
-                ${${PROJECT_NAME}_OPTIMISATION_LEVEL} \
-                "
-            )
-else ()
-    message(ERROR "Nope!")
-endif ()
+# apply Project flags and c++ standard defined in included cmake files.
+set(CMAKE_CXX_STANDARD "${${PROJECT_NAME}_CXX_STANDARD}")
+set(CMAKE_CXX_FLAGS    "${${PROJECT_NAME}_CXX_FLAGS}")
 
-set(CMAKE_CXX_FLAGS ${${PROJECT_NAME}_MAIN_CXX_FLAGS})
+message(STATUS "C++ Standard: " ${CMAKE_CXX_STANDARD})
+message(STATUS "C++ Flags:    " ${CMAKE_CXX_FLAGS})
 
-set(${PROJECT_NAME}_SOURCE_DIR ${PROJECT_SOURCE_DIR}/source)
-set(${PROJECT_NAME}_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
-set(${PROJECT_NAME}_INLINE_DIR ${PROJECT_SOURCE_DIR}/inline)
+find_package(DGtal REQUIRED)
+message(STATUS "Found DGtal:")
+message(STATUS "     Include directory: " ${DGTAL_INCLUDE_DIRS})
 
-set(${PROJECT_NAME}_INCLUDE_DIRS
-        ${CANTINA_COMMON_INCLUDE_DIR}
+set(${PROJECT_NAME}_LIBRARIES
+       DGtal
         )
 
-find_library(DGtal REQUIRED)
+set(${PROJECT_NAME}_INCLUDE_DIRS
+        ${${PROJECT_NAME}_INCLUDE_DIR}
+        ${DGTAL_INCLUDE_DIRS}
+        )
+
 
 include_directories(
         ${${PROJECT_NAME}_INCLUDE_DIRS}
@@ -77,15 +36,15 @@ include_directories(
 
 
 set(${PROJECT_NAME}_TD1_FILES
-        ## headers
-        # ${${PROJECT_NAME}_SOURCE_DIR}/...
+        ## source
+        ${${PROJECT_NAME}_SOURCE_DIR}/td1/main.cpp
 
-        #source
-        ${${PROJECT_NAME}_INCLUDE_DIR}/td1/main.cpp
+        ## headers
+        # ${${PROJECT_NAME}_INCLUDE_DIR}/...
         )
 
 add_executable(${PROJECT_NAME}_TD1 ${${PROJECT_NAME}_TD1_FILES})
 
-target_link_libraries(${PROJECT_NAME}_TD1 DGTal)
+target_link_libraries(${PROJECT_NAME}_TD1 ${${PROJECT_NAME}_LIBRARIES})
 # add_library(${PROJECT_NAME} STATIC ${${PROJECT_NAME}_FILES})
 
