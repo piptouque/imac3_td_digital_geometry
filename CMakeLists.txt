@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.6)
 project(imac3_td_dg)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/cmake)
-set(PROJECT_NAME  imac2_td_dg)
 
 include(SetProjectFlags)
 include(SetProjectDirectories)

@@ -5,10 +5,23 @@
 
 ---
 
+#### Build and run
+
+    mkdir build
+    cd build
+    cmake ..
+    make
+    
+    ./imac3_td_dg_TD[i] 
+    
+#### Answers and resources
+
+Can be found in answer_sheets/ and res/ respectively.
+
 
 #### Dependencies
 
-- Boost, etc..  todo!
+- Boost, etc.. 
 
 - Cairo
 
