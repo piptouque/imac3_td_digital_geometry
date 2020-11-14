@@ -57,20 +57,70 @@ The base b_{i} is:
     
 The height h_{i} is:
 
-    h_{i} =  |(p_{i+1} + p_{i}) / 2|
+    h_{i} =  |(p_{i+1} + p_{i})| / 2
     
 We find:
  
-    A(t_{i}) = (|(p_{i+1} - p_{i})| * |(p_{i+1} + p_{i})|) / 2
+    A(t_{i}) = b_{i} * h_{i} / 2
+    A(t_{i}) = (|(p_{i+1} - p_{i})| * |(p_{i+1} + p_{i})|) / 4
     
 And thus:
 
-    A(P) = (1/2) * sum( |(p_{i+1} - p_{i})| * |(p_{i+1} + p_{i})| ))
+    A(P) = sum( |(p_{i+1} - p_{i})| * |(p_{i+1} + p_{i})| )) / 4
    
 Note that the above formula does not depend on the Euclidian metric used.
 In case of an L2 norm, we can simplify it like so:
 
 
-    A(P) = (1/2) * sum( sqrt( (p_{i+1}^{2} - p_{i}^{2})^{2}) )
-         = (1/2) * sum( |(p_{i+1}^{2} - p_{i}^{2})| )
+    A(P) = sum( sqrt( (p_{i+1}^{2} - p_{i}^{2})^{2}) ) / 4
+         = sum( |(p_{i+1}^{2} - p_{i}^{2})| ) / 4
    
+##### Boundaries 
+
+![Boundaries](../res/Boundaries.png)
+
+##### Remarks
+
+By increasing the grid size we also increase the digitalised circle's shape accuracy.
+The digitalised square does not benefit from this, 
+because it is already identical to the original.
+
+#### Step 3
+
+*Note: Greater grid step means lower digital resolution.*
+
+![Areas](../res/ErrorArea.png)
+
+
+As expected, we see that by reducing the grid step, we obtain more accurate shapes on average.
+
+![Perimetres](../res/ErrorPerimetre.png)
+
+Once again, the Square shows more accurate results as the grid step decreases.
+Perhaps less expected, the error of the Disc converges towards a non-null value.
+As we saw in class, the perimetre of the sampled Disk should be
+constant equal to that of a Square of the same dimensions,
+because when reorganised, the curves are of the same length.
+
+#### Step 4
+
+![DiscHull](../res/ConvexHullDisc.png)
+
+![SquareHull](../res/ConvexHullSquare.png)
+
+The results are good for already convex polygons, as expected.
+However, using any other shapes would introduce an error.
+For instance, using shapes with holes, or any concave shape.
+
+#### Step 5
+
+![Areas](../res/ErrorAreaConvexHulls.png)
+
+No changes with the Areas, we get the same results as with the original digital shapes.
+
+![Perimetres](../res/ErrorPerimetreConvexHulls.png)
+
+The perimetre of the Square converges just like with the digital shape.
+We can see that this time the perimetre of the Disc is more accurate,
+it's clear when looking at the drawings, because we are using broken lines instead
+of only using vertical and horizontal lines.
