@@ -328,8 +328,8 @@ int
     Perimetre discPerimetre   = getDiscPerimetre(discRadius);
     Perimetre squarePerimetre = getSquarePerimetre(squareHalfWidth);
 
-    // Gauss discretization
-    double          h              = 20.;  // gridStep
+    // Gauss discretisation
+    double          h              = 1.;  // gridStep
     double          hHighRes       = 0.1;
     Digital<Disc>   discDig        = createDigitalShape(disc, h);
     Digital<Disc>   discDigHighRes = createDigitalShape(disc, hHighRes);
