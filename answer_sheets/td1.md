@@ -14,88 +14,110 @@
 
 #####  Can we define a convex polygon using implicit functions?
 
-We can express the shape of a convex polygon P as: 
+We can express the shape of a convex polygon $P$ as:
 
-    P = {(x, y) ∈ R 2 : V f ∈ F,  f(x, y) ≤ 0}
+$$
+    P = \{(x, y) \in  \Reals^{2} : \forall f ∈ F,  f(x, y) \leq 0\}
+$$
 
-With F a set of *n* implicit functions, each defining a line,
-and a half-plane in Cartesian coordinates. \a and \b are real numbers.
+With $F$ a set of $n$ implicit functions, each defining a line,
+and a half-plane in Cartesian coordinates. $a$ and $b$ are real numbers.
 
+$$
     f(x, y) = ax - by
-   
+$$   
 
 ##### Can we exactly calculate the area and perimeter of such Euclidean shapes defined by
 ##### implicit functions? If so, please give their formulas in the report.
 
 We can first compute the intersection of each lines which gives us the vertices of our polygon.
-How we would proceed is, we would compute all the intersections of the lines (there are at most `2 * n`),
-then find the closest one to the origin, we'll call it p_{0}.
+How we would proceed is, we would compute all the intersections of the lines (there are at most $2n$),
+then find the closest one to the origin, we'll call it $p_{0}$.
 
 We know that this intersection is a vertex of our polygon, because if it was not there would be
-two other points further away from the origin, with a face in the direction of p_{0}
+two other points further away from the origin, with a face in the direction of $p_{0}$
 from the origin, and the shape would not be convex.
 
-From there, we choose as p_{1} the intersection with another line such that p_{1} is the next closest to the origin.
-This defines the direction of the traversal, and we follow up with the p_{i}, i ∈ [|0, n|].
+From there, we choose as $p_{1}$ the intersection with another line such that $p_{1}$ is the next closest to the origin.
+This defines the direction of the traversal, and we follow up with the $p_{i}, i \in \llbracket 0, n \rrbracket$.
 
 
-Once we have a (p_{i}), i ∈ [|0, n|], we can compute the perimeter L of the polygon 
-by the sum of le length of its sides (1-cells).
+Once we have a $(p_{i})$, we can compute the perimeter $L$ of the polygon by the sum of le length of its sides (1-cells).
 By acknowledging:
 
+$$
     p_{n+1} = p_{0}
-    
+$$
+
 We find:
 
-    L(p) = sum( |p_{i+1} - p_{i}|, i ∈ [|0, n|] )
-    
+$$
+    L(p) = \sum_{i=0}^{n} |p_{i+1} - p_{i}|
+$$
+
 With the same convention on p, and with O the origin of our referential,
-we can define a set of *n* triangles by their respective vertices:
+we can define a set of $n$ triangles by their respective vertices:
 
-    t_{i} = {p_{i}, O, p_{i+1}}, i ∈ [|0, n|]
-    
-The area covered by the (t_{i}) form a 'partition' of the area of P, we can thus write:
+$$
+    t_{i} = \{p_{i}, 0, p_{i+1}\}, i \in \llbracket 0, n \rrbracket
+$$
 
-    A(P) = sum( A(t_{i}), i ∈ [|0, n|] )
+The area covered by the $(t_{i})$ form a 'partition' of the area of P, we can thus write:
+
+$$
+    A(P) = \sum_{i=0}^{n} A(t_{i})
+$$
 
 With the area of the triangle being half of the product of its base and height.
-The base b_{i} is:
+The base $b_{i}$ is:
 
+$$
     b_{i} = |p_{i+1} - p_{i}|
-    
-The height h_{i} is:
+$$
 
-    h_{i} =  |(p_{i+1} + p_{i})| / 2
-    
+The height $h_{i}$ is:
+
+$$
+    h_{i} =  \frac{|p_{i+1} + p_{i}|}{2}
+$$
+
 We find:
- 
-    A(t_{i}) = b_{i} * h_{i} / 2
-    A(t_{i}) = (|(p_{i+1} - p_{i})| * |(p_{i+1} + p_{i})|) / 4
-    
+
+$$
+    A(t_{i}) = \frac{b_{i} h_{i}}{2}
+    \\
+    A(t_{i}) = \frac{1}{4} |p_{i+1} - p_{i}| |p_{i+1} + p_{i}|
+$$
+
 And thus:
 
-    A(P) = sum( |(p_{i+1} - p_{i})| * |(p_{i+1} + p_{i})| )) / 4
-   
-Note that the above formula does not depend on the Euclidian metric used.
+$$
+    A(P) = \frac{1}{4} \sum_{i=0}^{n} |p_{i+1} - p_{i}| |p_{i+1} + p_{i}|
+$$
+
+Note that the above formula does not depend on the Euclidean metric used.
 In case of an L2 norm, we can simplify it like so:
 
+$$
+    A(P) = \frac{1}{4} \sum_{i=0}^{n} \sqrt{(p_{i+1}^{2} - p_{i}^{2})^{2}}
+         = \frac{1}{4} \sum_{i=0}^{n} |p_{i+1}^{2} - p_{i}^{2}|
+$$
 
-    A(P) = sum( sqrt( (p_{i+1}^{2} - p_{i}^{2})^{2}) ) / 4
-         = sum( |(p_{i+1}^{2} - p_{i}^{2})| ) / 4
-   
-##### Boundaries 
+##### Boundaries
 
 ![Boundaries](../res/Boundaries.png)
 
 ##### Remarks
 
 By increasing the grid size we also increase the digitalised circle's shape accuracy.
-The digitalised square does not benefit from this, 
+The digitalised square does not benefit from this,
 because it is already identical to the original.
 
 #### Step 3
 
-*Note: Greater grid step means lower digital resolution.*
+Notes:
+- Greater grid step means lower digital resolution.
+- For the rest of this document, the square's size will be half of the disc's, the difference in scales.
 
 ![Areas](../res/ErrorArea.png)
 
