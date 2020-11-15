@@ -28,8 +28,16 @@ and a half-plane in Cartesian coordinates. \a and \b are real numbers.
 ##### implicit functions? If so, please give their formulas in the report.
 
 We can first compute the intersection of each lines which gives us the vertices of our polygon.
-    
-todo: explain
+How we would proceed is, we would compute all the intersections of the lines (there are at most `2 * n`),
+then find the closest one to the origin, we'll call it p_{0}.
+
+We know that this intersection is a vertex of our polygon, because if it was not there would be
+two other points further away from the origin, with a face in the direction of p_{0}
+from the origin, and the shape would not be convex.
+
+From there, we choose as p_{1} the intersection with another line such that p_{1} is the next closest to the origin.
+This defines the direction of the traversal, and we follow up with the p_{i}, i ∈ [|0, n|].
+
 
 Once we have a (p_{i}), i ∈ [|0, n|], we can compute the perimeter L of the polygon 
 by the sum of le length of its sides (1-cells).
@@ -108,7 +116,9 @@ because when reorganised, the curves are of the same length.
 
 ![SquareHull](../res/ConvexHullSquare.png)
 
-The results are good for already convex polygons, as expected.
+The results are good for the digitalised convex shapes (which are not always convex themselves,
+for instance the Disc is only starred). Indeed, the error that we get are due solely to the digitalisation
+process.
 However, using any other shapes would introduce an error.
 For instance, using shapes with holes, or any concave shape.
 
