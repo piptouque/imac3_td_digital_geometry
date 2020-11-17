@@ -24,7 +24,7 @@ With $F$ a set of $n$ implicit functions, each defining a line,
 and a half-plane in Cartesian coordinates. $a$ and $b$ are real numbers.
 
 $$
-    f(x, y) = ax - by
+    f(x, y) = ax + by
 $$   
 
 ##### Can we exactly calculate the area and perimeter of such Euclidean shapes defined by
@@ -42,7 +42,7 @@ From there, we choose as $p_{1}$ the intersection with another line such that $p
 This defines the direction of the traversal, and we follow up with the $p_{i}, i \in \llbracket 0, n \rrbracket$.
 
 
-Once we have a $(p_{i})$, we can compute the perimeter $L$ of the polygon by the sum of le length of its sides (1-cells).
+Once we have $(p_{i})_{i \in \llbracket 0, n \rrbracket}$, we can compute the perimeter $L$ of the polygon by the sum of le length of its sides (1-cells).
 By acknowledging:
 
 $$
@@ -59,7 +59,7 @@ With the same convention on p, and with O the origin of our referential,
 we can define a set of $n$ triangles by their respective vertices:
 
 $$
-    t_{i} = \{p_{i}, 0, p_{i+1}\}, i \in \llbracket 0, n \rrbracket
+    t_{i} = \{p_{i}, (0, 0) , p_{i+1}\}, i \in \llbracket 0, n \rrbracket
 $$
 
 The area covered by the $(t_{i})$ form a 'partition' of the area of P, we can thus write:
