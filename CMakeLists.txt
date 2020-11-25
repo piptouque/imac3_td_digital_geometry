@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.6)
 
-project(imac3_td_dg)
+project(imac3_dg)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/cmake)
 
@@ -42,8 +42,14 @@ set(${PROJECT_NAME}_TD1_FILES
         # ${${PROJECT_NAME}_INCLUDE_DIR}/...
         )
 
-add_executable(${PROJECT_NAME}_TD1 ${${PROJECT_NAME}_TD1_FILES})
+set(${PROJECT_NAME}_TD2_FILES
+        ## source
+        ${${PROJECT_NAME}_SOURCE_DIR}/td2/main.cpp
+        )
 
-target_link_libraries(${PROJECT_NAME}_TD1 ${${PROJECT_NAME}_LIBRARIES})
-# add_library(${PROJECT_NAME} STATIC ${${PROJECT_NAME}_FILES})
+add_executable(${PROJECT_NAME}_td1 ${${PROJECT_NAME}_TD1_FILES})
+add_executable(${PROJECT_NAME}_td2 ${${PROJECT_NAME}_TD2_FILES})
+
+target_link_libraries(${PROJECT_NAME}_td1 ${${PROJECT_NAME}_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_td2 ${${PROJECT_NAME}_LIBRARIES})
 

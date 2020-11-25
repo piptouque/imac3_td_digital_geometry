@@ -5,14 +5,22 @@
 
 ---
 
-#### Build and run
+#### Build 
 
     mkdir build
     cd build
     cmake ..
     make
 
-    ./imac3_td_dg_TD[i]
+#### Run
+
+##### TD1
+
+    ./imac3_dg_td1
+    
+##### TD2
+
+    ./imac3_dg_td2 ../assets/rice_grains/rice_basmati_seg_bin.pgm 
 
 #### Answers and resources
 
