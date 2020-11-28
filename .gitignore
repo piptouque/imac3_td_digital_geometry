@@ -2,9 +2,6 @@
 # piptouque
 cmake-build-debug/
 
-# output image
-*.eps
-
 # from github/gitignore
 
 # Prerequisites
