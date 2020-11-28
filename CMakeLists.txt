@@ -23,8 +23,16 @@ set(${PROJECT_NAME}_LIBRARIES
        DGtal
         )
 
+set(${PROJECT_NAME}_UTIL_HEADERS
+        ${${PROJECT_NAME}_INCLUDE_DIR}/util/common.hpp
+        ${${PROJECT_NAME}_INCLUDE_DIR}/util/DigitalComponent.hpp
+        ${${PROJECT_NAME}_INCLUDE_DIR}/util/CompositeDigitalObject.hpp
+
+        )
+
 set(${PROJECT_NAME}_INCLUDE_DIRS
         ${${PROJECT_NAME}_INCLUDE_DIR}
+        ${${PROJECT_NAME}}_UTIL_HEADERS
         ${DGTAL_INCLUDE_DIRS}
         )
 
@@ -32,6 +40,7 @@ set(${PROJECT_NAME}_INCLUDE_DIRS
 include_directories(
         ${${PROJECT_NAME}_INCLUDE_DIRS}
 )
+
 
 
 set(${PROJECT_NAME}_TD1_FILES

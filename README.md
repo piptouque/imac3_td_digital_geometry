@@ -20,11 +20,11 @@
     
 ##### TD2
 
-    ./imac3_dg_td2 ../assets/rice_grains/rice_basmati_seg_bin.pgm 
+    ./imac3_dg_td2 rice_basmati_seg_bin.pgm rice_camargue_seg_bin.pgm rice_japanese_seg_bin.pgm 
 
-#### Answers and resources
+#### Answers, assets and resources
 
-Can be found in `answer_sheets/` and `res/` respectively.
+Can be found in `answer_sheets/td*/`, `assets/td*/` and `res/td*/` respectively.
 
 
 #### Dependencies

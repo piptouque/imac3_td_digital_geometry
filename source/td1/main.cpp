@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <algorithm>
-#include <fstream>
 #include <iostream>
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -18,6 +17,8 @@
 
 #include "DGtal/io/boards/Board2D.h"
 ///////////////////////////////////////////////////////////////////////////////
+
+#include <filesystem>
 
 using namespace DGtal;
 
@@ -40,12 +41,14 @@ typedef Z2i::Curve Boundary;
 typedef std::vector<std::vector<Z2i::SCell>> Surface;
 // Area and perimeter
 typedef double Area;
-typedef double Perimetre;
+typedef double Perimeter;
 
 // Functor class for computing relative orientation of three points in space.
 typedef InHalfPlaneBySimple3x3Matrix<DigitalPoint, DGtal::int64_t> OrientationFunctor;
 // Convex Hull
 typedef MelkmanConvexHull<DigitalPoint, OrientationFunctor> ConvexHull;
+
+static constexpr char const * outputDirName = "res/td1/";
 
 /// STEP 1 ////////////////////////////////////////////////////////////////////////////
 template <class Shape>
@@ -155,13 +158,13 @@ Area
 }
 
 template <class Shape, class Adjacency>
-Perimetre
-  getDigitalShapePerimetre(Digital<Shape> const & dig, Adjacency const & adj)
+Perimeter
+  getDigitalShapePerimeter(Digital<Shape> const & dig, Adjacency const & adj)
 {
     // Get the boundary of the digital shape.
     Boundary const                                  boundary  = getDigitalShapeBoundary(dig, adj);
     typename Digital<Shape>::Space::RealPoint const gridSteps = dig.gridSteps();
-    Perimetre                                       l         = 0;
+    Perimeter                                       l         = 0;
     for (auto const & [point, vector] : boundary.getArrowsRange())
     {
         // vector here gives the topology of the 1-cell
@@ -179,14 +182,14 @@ Perimetre
     return l;
 }
 
-Perimetre
-  getDiscPerimetre(double radius)
+Perimeter
+  getDiscPerimeter(double radius)
 {
     return 2 * boost::math::constants::pi<double>() * radius;
 }
 
-Perimetre
-  getSquarePerimetre(double halfWidth)
+Perimeter
+  getSquarePerimeter(double halfWidth)
 {
     return 8 * halfWidth;
 }
@@ -254,14 +257,14 @@ Area
         // Will use L2 norm.
         DigitalPoint const & p       = *it;
         DigitalPoint const & q       = *std::next(it);
-        Perimetre            dist    = (p - q).norm();
-        Perimetre            sumNorm = (p + q).norm();
+        Perimeter            dist    = (p - q).norm();
+        Perimeter            sumNorm = (p + q).norm();
         a += dist * sumNorm;
     }
     {
         DigitalPoint last    = *it;
-        Perimetre    dist    = (first - last).norm();
-        Perimetre    sumNorm = (first - last).norm();
+        Perimeter    dist    = (first - last).norm();
+        Perimeter    sumNorm = (first + last).norm();
         a += dist * sumNorm;
     }
     a /= 4.;
@@ -274,14 +277,14 @@ Area
 }
 
 template <class Shape, class Adjacency>
-Perimetre
-  getConvexHullPerimetre(Digital<Shape> const & dig, Adjacency const & adj)
+Perimeter
+  getConvexHullPerimeter(Digital<Shape> const & dig, Adjacency const & adj)
 {
     // Get the boundary of the digital shape.
     ConvexHull convexHull = getDigitalShapeConvexHull(dig, adj);
     // multiply by the surface of each cell.
     typename Digital<Shape>::Space::RealPoint gridSteps = dig.gridSteps();
-    Perimetre                                 l         = 0;
+    Perimeter                                 l         = 0;
     auto                                      it        = convexHull.begin();
     DigitalPoint                              first     = *it;
     for (; it != convexHull.end() && std::next(it) != convexHull.end(); ++it)
@@ -315,8 +318,8 @@ Perimetre
 int
   main()
 {
-    static constexpr Perimetre discRadius      = 10;
-    static constexpr Perimetre squareHalfWidth = 5;
+    static constexpr Perimeter discRadius      = 10;
+    static constexpr Perimeter squareHalfWidth = 5;
     // Shapes
     DigitalPoint centre(0, 0);
     Disc         disc(centre, discRadius);
@@ -325,8 +328,8 @@ int
     Area discArea   = getDiscArea(discRadius);
     Area squareArea = getSquareArea(squareHalfWidth);
 
-    Perimetre discPerimetre   = getDiscPerimetre(discRadius);
-    Perimetre squarePerimetre = getSquarePerimetre(squareHalfWidth);
+    Perimeter discPerimeter   = getDiscPerimeter(discRadius);
+    Perimeter squarePerimeter = getSquarePerimeter(squareHalfWidth);
 
     // Gauss discretisation
     double          h              = 1.;  // gridStep
@@ -338,22 +341,25 @@ int
     // Adjacency (4-connectivity)
     SurfelAdjacency<2> adj(true);
 
+    std::filesystem::path  outputPath = std::filesystem::current_path().parent_path() / outputDirName;
+
     /// STEP 2 ////////////////////////////////////////////////////////////////////////////
     std::vector<Boundary> boundaries;
     // disc
     boundaries.push_back(getDigitalShapeBoundary(discDig, adj));
+    drawDigitalShapeBoundaries(boundaries, outputPath / "DiscBoundary");
     // high-resolution disc
     boundaries.push_back(getDigitalShapeBoundary(discDigHighRes, adj));
     // square
     boundaries.push_back(getDigitalShapeBoundary(squareDig, adj));
 
-    drawDigitalShapeBoundaries(boundaries, "../res/Boundaries");
+    drawDigitalShapeBoundaries(boundaries, outputPath / "Boundaries");
 
     /// STEP 3 ////////////////////////////////////////////////////////////////////////////
     std::cout << "/// STEP 3 ///" << std::endl;
 
     std::vector<std::pair<Area, Area>>           areas;
-    std::vector<std::pair<Perimetre, Perimetre>> perimetres;
+    std::vector<std::pair<Perimeter, Perimeter>> perimeters;
 
     // discs of increasing resolutions
     static constexpr int numberSteps = 20;
@@ -362,7 +368,7 @@ int
         double        gridStep = numberSteps / static_cast<double>(i + 1);
         Digital<Disc> dig      = createDigitalShape(disc, gridStep);
         areas.emplace_back(getDigitalShapeArea(dig), discArea);
-        perimetres.emplace_back(getDigitalShapePerimetre(dig, adj), discPerimetre);
+        perimeters.emplace_back(getDigitalShapePerimeter(dig, adj), discPerimeter);
     }
 
     // then with squares
@@ -371,7 +377,7 @@ int
         double          gridStep = numberSteps / static_cast<double>(i + 1);
         Digital<Square> dig      = createDigitalShape(square, gridStep);
         areas.emplace_back(getDigitalShapeArea(dig), squareArea);
-        perimetres.emplace_back(getDigitalShapePerimetre(dig, adj), squarePerimetre);
+        perimeters.emplace_back(getDigitalShapePerimeter(dig, adj), squarePerimeter);
     }
 
     std::cout << "--- Area ---" << std::endl;
@@ -380,22 +386,22 @@ int
         std::cout << "Areas (Digital|Real) " << areaPair << std::endl;
     }
 
-    std::cout << "--- Perimetre ---" << std::endl;
-    for (auto const & perimetrePair : perimetres)
+    std::cout << "--- Perimeter ---" << std::endl;
+    for (auto const & perimeterPair : perimeters)
     {
-        std::cout << "Perimetres (Digital|Real) " << perimetrePair << std::endl;
+        std::cout << "Perimeters (Digital|Real) " << perimeterPair << std::endl;
     }
 
     /// STEP 4 ////////////////////////////////////////////////////////////////////////////
-    drawDigitalShapeConvexHull(discDig, adj, "../res/ConvexHullDisc");
-    drawDigitalShapeConvexHull(discDigHighRes, adj, "../res/ConvexHullDiscHighRes");
-    drawDigitalShapeConvexHull(squareDig, adj, "../res/ConvexHullSquare");
+    drawDigitalShapeConvexHull(discDig, adj, outputPath / "ConvexHullDisc");
+    drawDigitalShapeConvexHull(discDigHighRes, adj, outputPath / "ConvexHullDiscHighRes");
+    drawDigitalShapeConvexHull(squareDig, adj, outputPath / "ConvexHullSquare");
 
     /// STEP 5 ////////////////////////////////////////////////////////////////////////////
     std::cout << "/// STEP 5 ///" << std::endl;
 
     areas.clear();
-    perimetres.clear();
+    perimeters.clear();
 
     // discs of increasing resolutions
     for (int i = 0; i < numberSteps; ++i)
@@ -403,7 +409,7 @@ int
         double        gridStep = numberSteps / static_cast<double>(i + 1);
         Digital<Disc> dig      = createDigitalShape(disc, gridStep);
         areas.emplace_back(getConvexHullArea(dig, adj), discArea);
-        perimetres.emplace_back(getConvexHullPerimetre(dig, adj), discPerimetre);
+        perimeters.emplace_back(getConvexHullPerimeter(dig, adj), discPerimeter);
     }
 
     // then with squares
@@ -412,7 +418,7 @@ int
         double          gridStep = numberSteps / static_cast<double>(i + 1);
         Digital<Square> dig      = createDigitalShape(square, gridStep);
         areas.emplace_back(getConvexHullArea(dig, adj), squareArea);
-        perimetres.emplace_back(getConvexHullPerimetre(dig, adj), squarePerimetre);
+        perimeters.emplace_back(getConvexHullPerimeter(dig, adj), squarePerimeter);
     }
 
     std::cout << "--- Area ---" << std::endl;
@@ -421,10 +427,10 @@ int
         std::cout << "Areas (ConvexHull|Real) " << areaPair << std::endl;
     }
 
-    std::cout << "--- Perimetre ---" << std::endl;
-    for (auto const & perimetrePair : perimetres)
+    std::cout << "--- Perimeter ---" << std::endl;
+    for (auto const & perimeterPair : perimeters)
     {
-        std::cout << "Perimetres (ConvexHull|Real) " << perimetrePair << std::endl;
+        std::cout << "Perimeters (ConvexHull|Real) " << perimeterPair << std::endl;
     }
 }
 

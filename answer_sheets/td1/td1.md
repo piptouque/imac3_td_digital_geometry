@@ -17,7 +17,7 @@
 We can express the shape of a convex polygon $P$ as:
 
 $$
-    P = \{(x, y) \in  \Reals^{2} : \forall f ∈ F,  f(x, y) \leq 0\}
+    P = \{(x, y) \in  \R^{2} : \forall f ∈ F,  f(x, y) \leq 0\}
 $$
 
 With $F$ a set of $n$ implicit functions, each defining a line,
@@ -105,7 +105,7 @@ $$
 
 ##### Boundaries
 
-![Boundaries](../res/Boundaries.png)
+![Boundaries](../../res/td1/Boundaries.png)
 
 ##### Remarks
 
@@ -119,24 +119,24 @@ Notes:
 - Greater grid step means lower digital resolution.
 - For the rest of this document, the square's size will be half of the disc's, the difference in scales.
 
-![Areas](../res/ErrorArea.png)
+![Areas](../../assets/td1/ErrorArea.png)
 
 
 As expected, we see that by reducing the grid step, we obtain more accurate shapes on average.
 
-![Perimetres](../res/ErrorPerimetre.png)
+![Perimeters](../../assets/td1/ErrorPerimeter.png)
 
 Once again, the Square shows more accurate results as the grid step decreases.
 Perhaps less expected, the error of the Disc converges towards a non-null value.
-As we saw in class, the perimetre of the sampled Disk should be
+As we saw in class, the perimeter of the sampled Disk should be
 constant equal to that of a Square of the same dimensions,
 because when reorganised, the curves are of the same length.
 
 #### Step 4
 
-![DiscHull](../res/ConvexHullDisc.png)
+![DiscHull](../../res/td1/ConvexHullDisc.png)
 
-![SquareHull](../res/ConvexHullSquare.png)
+![SquareHull](../../res/td1/ConvexHullSquare.png)
 
 The results are good for the digitalised convex shapes (which are not always convex themselves,
 for instance the Disc is only starred). Indeed, the error that we get are due solely to the digitalisation
@@ -146,13 +146,13 @@ For instance, using shapes with holes, or any concave shape.
 
 #### Step 5
 
-![Areas](../res/ErrorAreaConvexHulls.png)
+![Areas](../../assets/td1/ErrorAreaConvexHulls.png)
 
 No changes with the Areas, we get the same results as with the original digital shapes.
 
-![Perimetres](../res/ErrorPerimetreConvexHulls.png)
+![Perimeters](../../assets/td1/ErrorPerimeterConvexHulls.png)
 
-The perimetre of the Square converges just like with the digital shape.
-We can see that this time the perimetre of the Disc is more accurate,
+The perimeter of the Square converges just like with the digital shape.
+We can see that this time the perimeter of the Disc is more accurate,
 it's clear when looking at the drawings, because we are using broken lines instead
 of only using vertical and horizontal lines.
