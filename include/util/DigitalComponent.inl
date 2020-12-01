@@ -6,7 +6,6 @@
 #define TD_UTIL_DIGITALCOMPONENT_INL
 
 #include <util/common.hpp>
-
 namespace td::util
 {
     template <int dimension, class Topology_T>
@@ -50,7 +49,6 @@ namespace td::util
         // a lot hinges on the choice for this middle point.
 
         // Since the shape is convex, we know that I will be in P.
-        // we store twice omega for the computations.
         auto begin = convexHull.begin();
         auto middle = begin + convexHull.size() / 2;
         return *middle + *begin;
@@ -147,7 +145,7 @@ namespace td::util
     {
         // see report for first assignment for details.
         // answer_sheets/td1.md
-        Area a = 0.;
+        auto a = static_cast<Area>(0.);
 
         auto begin = m_convexHull.begin();
         auto end   = m_convexHull.end();
@@ -160,7 +158,23 @@ namespace td::util
 
             a += (p - q).norm() * (p + q - m_omega).norm();
         }
-        a /= 4.;
+        a /= static_cast<Area>(4.);
+        return a;
+    }
+
+    template <int dimension, class Topology_T>
+    typename DigitalComponent<dimension, Topology_T>::Area
+    DigitalComponent<dimension, Topology_T>::getSegmentationArea() const
+    {
+        auto a = static_cast<Area>(0.);
+        for (auto const & segment : m_segmentation)
+        {
+            Point const & p          = segment.front();
+            Point const & q          = segment.back();
+
+            a += (p - q).norm() * (p + q - m_omega).norm();
+        }
+        a /= static_cast<Area>(4.);
         return a;
     }
 
@@ -178,7 +192,7 @@ namespace td::util
       DigitalComponent<dimension, Topology_T>::getConvexHullPerimeter() const
     {
         // multiply by the surface of each cell.
-        Perimeter l  = 0.;
+        auto l  = static_cast<Perimeter>(0.);
         for (auto it = m_convexHull.begin(); it < m_convexHull.end(); ++it)
         {
             bool const shouldLoop = std::next(it) == m_convexHull.end();
@@ -192,17 +206,31 @@ namespace td::util
     }
 
     template <int dimension, class Topology_T>
+    typename DigitalComponent<dimension, Topology_T>::Area
+    DigitalComponent<dimension, Topology_T>::getSegmentationPerimeter() const
+    {
+        auto l  = static_cast<Perimeter>(0.);
+        for (auto const & segment : m_segmentation)
+        {
+            // Will use L2 norm.
+            Point const & p = segment.front();
+            Point const & q = segment.back();
+            // Homography to set the scale of the diff in Real space.
+            l += (p - q).norm();
+        }
+        return l;
+    }
+
+    template <int dimension, class Topology_T>
     typename DigitalComponent<dimension, Topology_T>::FloatScalar
       DigitalComponent<dimension, Topology_T>::getCircularity() const
     {
-        // We should use the convex hull to compute area and perimeter,
+        // We should use the segmentation to compute area and perimeter,
         // since it is more accurate.
-        // But experience shows that it works better with the Count method, for some reason.
-        // We will still use Convex Hulls.
         // See report for the rationale behind this definition.
-        Perimeter l = getConvexHullPerimeter();
+        Perimeter l = getSegmentationPerimeter();
         Perimeter lSquared = maths<Perimeter>::power<2>(l);
-        Area      a = getConvexHullArea();
+        Area      a = getSegmentationArea();
         FloatScalar pi = maths<FloatScalar>::pi();
         FloatScalar circularity =  (static_cast<FloatScalar>(4.) * pi * a) / lSquared;
         return circularity;
@@ -223,14 +251,13 @@ namespace td::util
         board << DGtal::CustomStyle(m_boundary.className(), new DGtal::CustomFillColor(boundaryColour));
         board << m_boundary;
 
-        // draw Convex Hull
+        // draw Convex Hull (with segmentation, actually.)
         board.setPenColor(convexHullColour);
         board.setFillColor(Colour::None);
-        for (auto it = m_convexHull.begin(); it < m_convexHull.end(); ++it)
+        for (auto const & segment : m_segmentation)
         {
-            bool  const   shouldLoop = std::next(it) == m_convexHull.end();
-            Point const & p          = *it;
-            Point const & q          = *(shouldLoop ? m_convexHull.begin() : std::next(it));
+            Point const & p          = segment.front();
+            Point const & q          = segment.back();
 
             // there is a little +1/2 shift in the board exporter
             double offset = 0.5;

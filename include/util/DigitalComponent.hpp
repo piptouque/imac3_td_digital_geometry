@@ -16,6 +16,7 @@
 namespace td::util
 {
     /// A class for closed digital objects.
+    /// That is, digital objects which are CONNECTED.
     /// \tparam dimension
     /// \tparam Topology_T
     template <int dimension, class Topology_T>
@@ -52,7 +53,7 @@ namespace td::util
 
         // Circularity is without dimension.
         typedef double FloatScalar;
-        // Area and Perimeter (this time, they are to normalised relative to the scale of the grid.)
+        // Area and Perimeter (this time, they are normalised relative to the scale of the grid.)
         typedef double Area;
         typedef Area   Perimeter;
 
@@ -82,12 +83,16 @@ namespace td::util
           getCountArea() const;
         [[nodiscard]] inline Area
           getConvexHullArea() const;
+        [[nodiscard]] inline Area
+          getSegmentationArea() const;
 
         // Perimeter computations.
         [[nodiscard]] inline Perimeter
           getCountPerimeter() const;
         [[nodiscard]] inline Perimeter
           getConvexHullPerimeter() const;
+        [[nodiscard]] inline Perimeter
+          getSegmentationPerimeter() const;
 
         [[nodiscard]] inline FloatScalar
           getCircularity() const;
@@ -111,6 +116,8 @@ namespace td::util
         ConvexHull   m_convexHull;
         Segmentation m_segmentation;
 
+        // we store twice I (omega) for the computations.
+        // see report for details.
         Point m_omega;
 
         // Adjacency object.

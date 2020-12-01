@@ -60,14 +60,18 @@ Except of the output of the programme:
 
     ---- STATISTICS -----
     -- rice_basmati_seg_bin.pgm --
-    [Area (CH)]         avg: 3702  deviation: 803.652
     [Area (Count)]      avg: 2226.59  deviation: 454.898
+    [Area (CH)]         avg: 3702  deviation: 803.652
+    [Area (Seg)]         avg: 3603.95  deviation: 848.445
     -- rice_camargue_seg_bin.pgm --
-    [Area (CH)]         avg: 3383.54  deviation: 828.027
     [Area (Count)]      avg: 2638.82  deviation: 618.246
+    [Area (CH)]         avg: 3383.54  deviation: 828.027
+    [Area (Seg)]         avg: 3261.8  deviation: 837.072
     -- rice_japanese_seg_bin.pgm --
-    [Area (CH)]         avg: 2345.53  deviation: 180.161
     [Area (Count)]      avg: 2058.34  deviation: 164.672
+    [Area (CH)]         avg: 2345.53  deviation: 180.161
+    [Area (Seg)]         avg: 2245.44  deviation: 205.165
+
 
 For a reason we could not find, the area is much better computed by the count method. The grid resolution being rather high, we should find comparable results.
 As things are, the area is not a good basis for classification because it suffers from too much deviation (note that in this case the deviation is homogeneous to a surface).
@@ -85,14 +89,18 @@ Another part of the output:
 
     ---- STATISTICS -----
     -- rice_basmati_seg_bin.pgm --
-    [Perimeter (CH)]    avg: 229.764  deviation: 29.8473
     [Perimeter (Count)] avg: 289.079  deviation: 47.2297
+    [Perimeter (CH)]    avg: 229.764  deviation: 29.8473
+    [Perimeter (Seg)]    avg: 226.145  deviation: 34.1156
     -- rice_camargue_seg_bin.pgm --
-    [Perimeter (CH)]    avg: 211.942  deviation: 32.0266
     [Perimeter (Count)] avg: 266.655  deviation: 46.3045
+    [Perimeter (CH)]    avg: 211.942  deviation: 32.0266
+    [Perimeter (Seg)]    avg: 207.873  deviation: 35.7147
     -- rice_japanese_seg_bin.pgm --
-    [Perimeter (CH)]    avg: 174.957  deviation: 6.3039
     [Perimeter (Count)] avg: 218.971  deviation: 14.4761
+    [Perimeter (CH)]    avg: 174.957  deviation: 6.3039
+    [Perimeter (Seg)]    avg: 171.2  deviation: 10.7742
+
 
 Here we get better results from the Convex Hull method, as expected. However, the perimeters are on average a bit too close to each other (taking the standard deviation into account) for us to be able to classify the grains based solely on this criteria.
 
@@ -148,16 +156,17 @@ Here is a final sample of the output of the programme:
 
     ---- MORE STATISTICS -----
     -- rice_basmati_seg_bin.pgm --
-    [Area (CH)]      avg: 3702  deviation 803.652
-    [Perimeter (CH)] avg: 229.764  deviation 29.8473
-    [Circularity]    avg: 0.87093  deviation:  0.0462865
+    [Area (Seg)]         avg: 3603.95  deviation: 848.445
+    [Perimeter (Seg)]    avg: 226.145  deviation: 34.1156
+    [Circularity]    avg: 0.883652  deviation:  0.146412
     -- rice_camargue_seg_bin.pgm --
-    [Area (CH)]      avg: 3383.54  deviation 828.027
-    [Perimeter (CH)] avg: 211.942  deviation 32.0266
-    [Circularity]    avg: 0.92582  deviation:  0.0343498
+    [Area (Seg)]         avg: 3261.8  deviation: 837.072
+    [Perimeter (Seg)]    avg: 207.873  deviation: 35.7147
+    [Circularity]    avg: 0.934208  deviation:  0.082935
     -- rice_japanese_seg_bin.pgm --
-    [Area (CH)]      avg: 2345.53  deviation 180.161
-    [Perimeter (CH)] avg: 174.957  deviation 6.3039
-    [Circularity]    avg: 0.961429  deviation:  0.0214239
+    [Area (Seg)]         avg: 2245.44  deviation: 205.165
+    [Perimeter (Seg)]    avg: 171.2  deviation: 10.7742
+    [Circularity]    avg: 0.965036  deviation:  0.0762395
 
-The Circularity criteria proves to be just about as good as using perimeter (taking deviation into account.) Experience has shown that it performs better when using the count method for computing areas and perimeters, but it should not generalise. The latter method should logically not perform well for more round shapes like the japanese grains, but it was not the case in our example. In the end, we kept the Convex Hull.
+As expected, the more round-shaped japanese rice grains have larger circularity on average than the others, while carmague rice grains are half-way between.
+The Circularity criteria proves to be just about as good as using perimeter (taking deviation into account.) Experience has shown that it performs better when using the count method for computing areas and perimeters, but it should not generalise. The latter method should logically not perform well for more round shapes like the japanese grains, but it was not the case in our example. In the end, we kept the Segmentation method.

@@ -68,21 +68,29 @@ int
     std::vector<std::vector<Perimeter>> countPerimeters;
     std::vector<std::vector<Area>>      convexHullAreas;
     std::vector<std::vector<Perimeter>> convexHullPerimeters;
+    std::vector<std::vector<Area>>      segmentationAreas;
+    std::vector<std::vector<Perimeter>> segmentationPerimeters;
 
-    // The circularities are computed with the convex hulls only.
+
+    // The circularities are computed with the *segmentation* only.
     std::vector<std::vector<FloatScalar>> circularities;
 
     // first is average, second is standard deviation
     std::vector<std::pair<Area, Area>>               statCountAreas;
-    std::vector<std::pair<Area, Area>>               statConvexHullAreas;
     std::vector<std::pair<Perimeter, Perimeter>>     statCountPerimeters;
+    std::vector<std::pair<Area, Area>>               statConvexHullAreas;
     std::vector<std::pair<Perimeter, Perimeter>>     statConvexHullPerimeters;
+    std::vector<std::pair<Area, Area>>               statSegmentationAreas;
+    std::vector<std::pair<Perimeter, Perimeter>>     statSegmentationPerimeters;
+
     std::vector<std::pair<FloatScalar, FloatScalar>> statCircularities;
 
     countAreas.reserve(compositeObjects.size());
     countPerimeters.reserve(compositeObjects.size());
     convexHullAreas.reserve(compositeObjects.size());
     convexHullPerimeters.reserve(compositeObjects.size());
+    segmentationAreas.reserve(compositeObjects.size());
+    segmentationPerimeters.reserve(compositeObjects.size());
 
     circularities.reserve(compositeObjects.size());
 
@@ -90,6 +98,9 @@ int
     statCountPerimeters.reserve(compositeObjects.size());
     statConvexHullAreas.reserve(compositeObjects.size());
     statConvexHullPerimeters.reserve(compositeObjects.size());
+    statSegmentationAreas.reserve(compositeObjects.size());
+    statSegmentationPerimeters.reserve(compositeObjects.size());
+
     statCircularities.reserve(compositeObjects.size());
 
     for (auto const & composite : compositeObjects)
@@ -98,20 +109,30 @@ int
         countPerimeters.emplace_back();
         convexHullAreas.emplace_back();
         convexHullPerimeters.emplace_back();
+        segmentationAreas.emplace_back();
+        segmentationPerimeters.emplace_back();
 
         circularities.emplace_back();
 
         countAreas.back().reserve(composite.components.size());
         countPerimeters.back().reserve(composite.components.size());
+        convexHullAreas.back().reserve(composite.components.size());
+        convexHullPerimeters.back().reserve(composite.components.size());
+        segmentationAreas.back().reserve(composite.components.size());
+        segmentationPerimeters.back().reserve(composite.components.size());
+
         circularities.reserve(composite.components.size());
 
         for (auto const & component : composite.components)
         {
             countAreas.back().push_back(component.getCountArea());
-            convexHullAreas.back().push_back(component.getConvexHullArea());
-
             countPerimeters.back().push_back(component.getCountPerimeter());
+
+            convexHullAreas.back().push_back(component.getConvexHullArea());
             convexHullPerimeters.back().push_back(component.getConvexHullPerimeter());
+
+            segmentationAreas.back().push_back(component.getSegmentationArea());
+            segmentationPerimeters.back().push_back(component.getSegmentationPerimeter());
 
             circularities.back().emplace_back(component.getCircularity());
         }
@@ -120,10 +141,16 @@ int
                                Maths<Area>::standardDeviation(countAreas.back()));
         statCountPerimeters.emplace_back(Maths<Area>::average(countPerimeters.back()),
                                     Maths<Area>::standardDeviation(countPerimeters.back()));
+
         statConvexHullAreas.emplace_back(Maths<Area>::average(convexHullAreas.back()),
                                Maths<Area>::standardDeviation(convexHullAreas.back()));
         statConvexHullPerimeters.emplace_back(Maths<Area>::average(convexHullPerimeters.back()),
                                     Maths<Area>::standardDeviation(convexHullPerimeters.back()));
+
+        statSegmentationAreas.emplace_back(Maths<Area>::average(segmentationAreas.back()),
+                                         Maths<Area>::standardDeviation(segmentationAreas.back()));
+        statSegmentationPerimeters.emplace_back(Maths<Area>::average(segmentationPerimeters.back()),
+                                              Maths<Area>::standardDeviation(segmentationPerimeters.back()));
 
         statCircularities.emplace_back(Maths<Area>::average(circularities.back()),
                                     Maths<Area>::standardDeviation(circularities.back()));
@@ -135,14 +162,18 @@ int
     for (std::size_t i = 0; i < compositeObjects.size(); ++i)
     {
         std::cout << "-- " << argv[i+1] << " --" << std::endl;
-        std::cout << "[Area (CH)]         avg: " << statConvexHullAreas.at(i).first
-                  << "  deviation: " << statConvexHullAreas.at(i).second << std::endl;
         std::cout << "[Area (Count)]      avg: " << statCountAreas.at(i).first
                   << "  deviation: " << statCountAreas.at(i).second << std::endl;
-        std::cout << "[Perimeter (CH)]    avg: " << statConvexHullPerimeters.at(i).first
-                  << "  deviation: " << statConvexHullPerimeters.at(i).second << std::endl;
+        std::cout << "[Area (CH)]         avg: " << statConvexHullAreas.at(i).first
+                  << "  deviation: " << statConvexHullAreas.at(i).second << std::endl;
+        std::cout << "[Area (Seg)]         avg: " << statSegmentationAreas.at(i).first
+                  << "  deviation: " << statSegmentationAreas.at(i).second << std::endl;
         std::cout << "[Perimeter (Count)] avg: " << statCountPerimeters.at(i).first
                   << "  deviation: " << statCountPerimeters.at(i).second << std::endl;
+        std::cout << "[Perimeter (CH)]    avg: " << statConvexHullPerimeters.at(i).first
+                  << "  deviation: " << statConvexHullPerimeters.at(i).second << std::endl;
+        std::cout << "[Perimeter (Seg)]    avg: " << statSegmentationPerimeters.at(i).first
+                  << "  deviation: " << statSegmentationPerimeters.at(i).second << std::endl;
     }
 
     ///
@@ -151,10 +182,10 @@ int
     for (std::size_t i = 0; i < compositeObjects.size(); ++i)
     {
         std::cout << "-- " << argv[i+1] << " --" << std::endl;
-        std::cout << "[Area (CH)]      avg: " << statConvexHullAreas.at(i).first
-                  << "  deviation " << statConvexHullAreas.at(i).second << std::endl;
-        std::cout << "[Perimeter (CH)] avg: " << statConvexHullPerimeters.at(i).first
-                  << "  deviation " << statConvexHullPerimeters.at(i).second << std::endl;
+        std::cout << "[Area (Seg)]         avg: " << statSegmentationAreas.at(i).first
+                  << "  deviation: " << statSegmentationAreas.at(i).second << std::endl;
+        std::cout << "[Perimeter (Seg)]    avg: " << statSegmentationPerimeters.at(i).first
+                  << "  deviation: " << statSegmentationPerimeters.at(i).second << std::endl;
         std::cout << "[Circularity]    avg: " << statCircularities.at(i).first
                   << "  deviation:  " << statCircularities.at(i).second << std::endl;
     }
