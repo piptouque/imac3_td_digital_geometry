@@ -2,7 +2,7 @@
 
 ##### M2 SIS, UGE
 
-### Laboratory Session 1
+### Laboratory Session \#1
 
 #### November 13th, 2020
 
