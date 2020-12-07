@@ -21,10 +21,10 @@ $$
 $$
 
 With $F$ a set of $n$ implicit functions, each defining a line,
-and a half-plane in Cartesian coordinates. $a$ and $b$ are real numbers.
+and a half-plane in Cartesian coordinates. $a$, $b$ and $c$ are real numbers.
 
 $$
-    f(x, y) = ax + by
+    f(x, y) = ax + by + c
 $$   
 
 ##### Can we exactly calculate the area and perimeter of such Euclidean shapes defined by
