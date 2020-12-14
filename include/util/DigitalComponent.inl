@@ -5,15 +5,26 @@
 #ifndef TD_UTIL_DIGITALCOMPONENT_INL
 #define TD_UTIL_DIGITALCOMPONENT_INL
 
+
+// cloning mechanism (deep copy)
+#include <DGtal/base/Clone.h>
+
 #include <util/common.hpp>
 namespace td::util
 {
     template <int dimension, class Topology_T>
     inline DigitalComponent<dimension, Topology_T>::DigitalComponent(const DigitalComponent::Object & a_object)
-        : m_object(a_object), m_boundary(computeBoundary(m_object)), m_convexHull(computeConvexHull(m_boundary)),
-          m_segmentation(m_boundary.getPointsRange().begin(), m_boundary.getPointsRange().end(), SegmentComputer()),
-          m_omega(computeOmega(m_convexHull))
+        : m_object(a_object)
     {}
+
+    template <int dimension, class Topology_T>
+    DigitalComponent<dimension, Topology_T>::DigitalComponent(DigitalComponent const & component)
+      : m_object(DGtal::Clone(component.m_object)), m_boundary(DGtal::Clone(component.m_boundary)), m_segmentation(),
+        m_omega(DGtal::Clone(component.m_omega))
+    {
+        m_segmentation.setSubRange(m_boundary.getPointsRange().begin(), m_boundary.getPointsRange().end());
+    }
+
 
     template <int dimension, class Topology_T>
     DigitalComponent<dimension, Topology_T>::DigitalComponent(DigitalComponent && component) noexcept
@@ -33,6 +44,17 @@ namespace td::util
         m_segmentation.setSubRange(m_boundary.getPointsRange().begin(), m_boundary.getPointsRange().end());
         m_omega = other.m_omega;
         return *this;
+    }
+
+
+    template <int dimension, class Topology_T>
+    inline void
+    DigitalComponent<dimension, Topology_T>::compute()
+    {
+        m_boundary = computeBoundary(m_object);
+        m_convexHull = computeConvexHull(m_boundary);
+        m_segmentation.setSubRange(m_boundary.getPointsRange().begin(), m_boundary.getPointsRange().end());
+        m_omega = computeOmega(m_convexHull);
     }
 
     template <int dimension, class Topology_T>
@@ -75,12 +97,18 @@ namespace td::util
 
         // 1) Call Surfaces::findABel() to find a cell which belongs to the border
 
+        // TD2:
         // findABell can't seem to find a boundary point with an acceptable
         // number of tries:
         // at s_numberTries == 1000, it fails on the first component
         // at s_numberTries == 10000, still fails for japanese and camargue rice
         // at s_numberTries == 100_000, it finally goes through.
 
+        // TD3:
+        // Even 10_000_000 isn't enough.
+
+        // number of tries for stochastic search of a border cell.
+        int constexpr s_numberTries = 100000;
         // On second thought, using random.
         // find the boundary cell.
         SCell boundaryCell = DGtal::Surfaces<KSpace>::findABel(kSpace, objectComponent.pointSet(), s_numberTries);
@@ -89,7 +117,7 @@ namespace td::util
         DGtal::template Surfaces<KSpace>::track2DBoundaryPoints(boundaryPoints,
                                                        kSpace,
                                                        s_adjacency,
-                                                       // DigitalSets are models of PointPredicate, no worry.
+                                                       // DigitalSets are models of PointPredicate, no worries.
                                                        objectComponent.pointSet(),
                                                        boundaryCell);
         Curve boundaryCurve;

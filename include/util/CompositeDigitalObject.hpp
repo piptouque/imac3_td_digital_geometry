@@ -32,6 +32,7 @@ namespace td::util
         // c-tor
         inline explicit CompositeDigitalObject(Image const & image);
 
+        inline CompositeDigitalObject(CompositeDigitalObject const & wrapper);
         // And for some reason it does not compile if I mark this as noexcept..
         inline CompositeDigitalObject(CompositeDigitalObject && wrapper) = default;
 

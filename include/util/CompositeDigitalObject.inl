@@ -6,8 +6,12 @@
 #define TD_UTIL_DIGITALOBJECTWRAPPER_INL
 
 #include <DGtal/images/imagesSetsUtils/SetFromImage.h>
+// cloning mechanism (deep copy)
+#include <DGtal/base/Clone.h>
 
 #include <algorithm>
+
+#include "CompositeDigitalObject.hpp"
 
 namespace td::util
 {
@@ -24,6 +28,14 @@ namespace td::util
         // we remove the components too close to the domain's rim.
         cullBorderComponents();
     }
+
+    template <int dimension, class Topology_T>
+    CompositeDigitalObject<dimension, Topology_T>::CompositeDigitalObject(const CompositeDigitalObject & wrapper)
+        : components(wrapper.components), m_object(DGtal::Clone(wrapper.m_object))
+    {
+
+    }
+
     template <int dimension, class Topology_T>
     void
       CompositeDigitalObject<dimension, Topology_T>::cullBorderComponents()
@@ -34,24 +46,17 @@ namespace td::util
         // as an end condition,
         // because of erasure, the iterator index gets messed up,
         // and can jump the end such that it > components.end()
-        for (auto it = components.begin(); it < components.end(); ++it)
+        for (auto it = components.begin(); it < components.end();)
         {
             if (it->isBorderingRim(compositeDomain))
             {
                 it = components.erase(it);
             }
+            else
+            {
+                ++it;
+            }
         }
-        /* for some other idiotic reason I can't use this.
-         * but I like it, so it stays.
-        std::remove_if(
-         components.begin(),
-          components.end(),
-          [&compositeDomain](Component const & component) -> bool
-          {
-            return component.isBorderingRim(compositeDomain);
-          }
-          );
-          */
     }
 
     template <int dimension, class Topology_T>

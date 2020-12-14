@@ -54,6 +54,10 @@ int
         Image const           image = DGtal::PGMReader<Image>::importPGM(path);
 
         compositeObjects.emplace_back(image);
+        for (auto & component : compositeObjects.back().components)
+        {
+            component.compute();
+        }
     }
 
     for (auto const & composite : compositeObjects)

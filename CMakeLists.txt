@@ -56,9 +56,16 @@ set(${PROJECT_NAME}_TD2_FILES
         ${${PROJECT_NAME}_SOURCE_DIR}/td2/main.cpp
         )
 
+set(${PROJECT_NAME}_TD3_FILES
+        ## source
+        ${${PROJECT_NAME}_SOURCE_DIR}/td3/main.cpp
+        )
+
 add_executable(${PROJECT_NAME}_td1 ${${PROJECT_NAME}_TD1_FILES})
 add_executable(${PROJECT_NAME}_td2 ${${PROJECT_NAME}_TD2_FILES})
+add_executable(${PROJECT_NAME}_td3 ${${PROJECT_NAME}_TD3_FILES})
 
 target_link_libraries(${PROJECT_NAME}_td1 ${${PROJECT_NAME}_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_td2 ${${PROJECT_NAME}_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_td3 ${${PROJECT_NAME}_LIBRARIES})
 

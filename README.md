@@ -22,6 +22,10 @@
 
     ./imac3_dg_td2 rice_basmati_seg_bin.pgm rice_camargue_seg_bin.pgm rice_japanese_seg_bin.pgm 
 
+##### TD3
+
+    ./imac3_dg_td3 knife pliers wrench
+
 #### Answers, assets and resources
 
 Can be found in `answer_sheets/td*/`, `assets/td*/` and `res/td*/` respectively.

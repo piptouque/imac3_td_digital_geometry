@@ -63,14 +63,18 @@ namespace td::util
 
         /** --------- methods ------------- **/
 
-        inline explicit DigitalComponent(Object const & a_object);
+        inline explicit DigitalComponent(Object const & object);
 
+        // copy constructor
+        inline  DigitalComponent(DigitalComponent const & component);
         // need to explicitly define a move constructor...
         inline DigitalComponent(DigitalComponent && component) noexcept;
 
         // and a copy operator...
         inline DigitalComponent &
           operator=(DigitalComponent const & other);
+
+        inline void compute();
 
         [[nodiscard]] inline DGtal::Board2D
           draw(Colour const & objectColour = Colour::None,
@@ -123,8 +127,6 @@ namespace td::util
         // Adjacency object.
         // Interior to exterior only for adjacency pairs.
         inline static Adjacency const s_adjacency = {true};
-        // number of tries for stochastic search of a border cell.
-        static int constexpr s_numberTries = 100000;
 
     };
 
