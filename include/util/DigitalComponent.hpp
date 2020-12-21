@@ -10,8 +10,10 @@
 #include <DGtal/topology/SurfelAdjacency.h>
 #include <DGtal/topology/helpers/Surfaces.h>
 
-// added in order to access GreedySegmentation
 #include <DGtal/geometry/curves/GreedySegmentation.h>
+
+
+#include <util/eigen.hpp>
 
 namespace td::util
 {
@@ -20,8 +22,9 @@ namespace td::util
     /// \tparam dimension
     /// \tparam Topology_T
     template <int dimension, class Topology_T>
-    struct DigitalComponent
+    class DigitalComponent
     {
+    public:
         /** --------- typedefs ------------- **/
         // Topology
         typedef Topology_T                                  DigitalTopology;
@@ -30,10 +33,12 @@ namespace td::util
         typedef DGtal::SpaceND<dimension, Integer>          Space;
         typedef DGtal::HyperRectDomain<Space>               Domain;
 
+
         typedef typename DGtal::DigitalSetSelector<Domain, DGtal::HIGH_BEL_DS + 2>::Type PointSet;
 
         typedef typename KSpace::SCell   SCell;
         typedef typename Space::Point    Point;
+        typedef typename Space::Vector   Vector;
         typedef DGtal::GridCurve<KSpace> Curve;
         // Digital object type
         typedef DGtal::Object<DigitalTopology, PointSet> Object;
@@ -56,6 +61,11 @@ namespace td::util
         // Area and Perimeter (this time, they are normalised relative to the scale of the grid.)
         typedef double Area;
         typedef Area   Perimeter;
+        //
+        typedef double AngleRadian;
+
+        // matrix and vector types
+        typedef Eigen::Matrix<FloatScalar, dimension, dimension> Matrix;
 
         // things
         typedef DGtal::Color Colour;
@@ -74,13 +84,18 @@ namespace td::util
         inline DigitalComponent &
           operator=(DigitalComponent const & other);
 
-        inline void compute();
 
-        [[nodiscard]] inline DGtal::Board2D
-          draw(Colour const & objectColour = Colour::None,
-               Colour const & boundaryColour = Colour::Black,
-               Colour const & segmentColour = Colour::Aqua,
-               Colour const & convexHullColour = Colour::Red) const;
+
+        void
+        drawObject(DGtal::Board2D & board,
+             const Colour &   objectColour     = Colour::None) const;
+
+             void
+          draw(DGtal::Board2D & board,
+               const Colour &   objectColour     = Colour::None,
+               const Colour &   segmentColour    = Colour::Aqua,
+               const Colour &   convexHullColour = Colour::Red,
+               const Colour &   boundaryColour   = Colour::Black) const;
 
         // Area computations.
         [[nodiscard]] inline Area
@@ -101,8 +116,28 @@ namespace td::util
         [[nodiscard]] inline FloatScalar
           getCircularity() const;
 
+        [[nodiscard]] inline Point
+          getPositionFromCentre(Point const & point) const;
+
+        [[nodiscard]] inline Vector
+        getTranslationTo(DigitalComponent const & other) const;
+
+        [[nodiscard]] Perimeter computeHausdorffDistance(DigitalComponent const & other) const;
+        [[nodiscard]] Perimeter computeDubuissonJainDissimilarity(DigitalComponent const & other) const;
+
+        /// Computes geometric centre of the shape.
+        /// Called centre of mass in the assigment.
+        /// \return geometric centre.
+        [[nodiscard]] inline Point
+          getGeometricCentre() const;
+
+
         [[nodiscard]] inline bool
           isBorderingRim(Domain const & compositeDomain) const;
+
+        [[nodiscard]] inline static AngleRadian computeRotationAngle(
+          std::vector<Point> const & points1,
+          std::vector<Point> const & points2);
 
        private:
 
@@ -114,15 +149,29 @@ namespace td::util
         [[nodiscard]] inline static Point
           computeOmega(ConvexHull const & convexHull);
 
+        /// Computes Boundary, Convex Hull and Segmentation.
+        inline void
+        computeGeometry() const;
+
+        [[nodiscard]] Perimeter computeClosestPointDistance(Point  const & from) const;
+        [[nodiscard]] Perimeter computeFarthestDistance(DigitalComponent const & other) const;
+        [[nodiscard]] Perimeter computeAverageDistance(DigitalComponent const & other) const;
+
+        inline void computeGeometryIfNotSet() const;
+
         /** --------- data ------------- **/
-        Object       m_object;
-        Curve        m_boundary;
-        ConvexHull   m_convexHull;
-        Segmentation m_segmentation;
+        Object m_object;
+        // Computed from the digital object.
+        Curve  mutable       m_boundary;
+        ConvexHull mutable   m_convexHull;
+        Segmentation mutable m_segmentation;
 
         // we store twice I (omega) for the computations.
         // see report for details.
-        Point m_omega;
+        Point mutable m_omega;
+
+        // Computing geometry only if needed.
+        bool mutable m_isSet;
 
         // Adjacency object.
         // Interior to exterior only for adjacency pairs.

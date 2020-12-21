@@ -118,7 +118,7 @@ However, we use this method with non-convex polygons. For instance in the previo
 
 ![DiscDigitalised](../../res/td1/DiscBoundary.png)
 
-Therefore, we should use the convex hull of a digital object to compute its area and perimeter, as we know it more truthful than the counting method for digitalisations of convex shapes that are not convex themselves.
+Therefore, we should use the convex hull of a digital object to computeGeometry its area and perimeter, as we know it more truthful than the counting method for digitalisations of convex shapes that are not convex themselves.
 
 ![DiscHull](../../res/td1/ConvexHullDisc.png)
 

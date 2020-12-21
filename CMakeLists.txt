@@ -19,12 +19,16 @@ find_package(DGtal REQUIRED)
 message(STATUS "Found DGtal:")
 message(STATUS "     Include directory: " ${DGTAL_INCLUDE_DIRS})
 
+# eigen
+set(EIGEN_INCLUDE_DIRS "third_party/eigen")
+
 set(${PROJECT_NAME}_LIBRARIES
        DGtal
         )
 
 set(${PROJECT_NAME}_UTIL_HEADERS
         ${${PROJECT_NAME}_INCLUDE_DIR}/util/common.hpp
+        ${${PROJECT_NAME}_INCLUDE_DIR}/util/eigen.hpp
         ${${PROJECT_NAME}_INCLUDE_DIR}/util/DigitalComponent.hpp
         ${${PROJECT_NAME}_INCLUDE_DIR}/util/CompositeDigitalObject.hpp
 
@@ -34,6 +38,7 @@ set(${PROJECT_NAME}_INCLUDE_DIRS
         ${${PROJECT_NAME}_INCLUDE_DIR}
         ${${PROJECT_NAME}}_UTIL_HEADERS
         ${DGTAL_INCLUDE_DIRS}
+        ${EIGEN_INCLUDE_DIRS}
         )
 
 

@@ -24,7 +24,7 @@
 
 ##### TD3
 
-    ./imac3_dg_td3 knife pliers wrench
+    ./imac3_dg_td3 knife
 
 #### Answers, assets and resources
 

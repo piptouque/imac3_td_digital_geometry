@@ -52,6 +52,18 @@ namespace td::util
         static constexpr T power(T val);
 
     };
+
+    template <typename T>
+    class algorithms
+    {
+       public:
+        template <class Point_T>
+        [[nodiscard]] inline static Eigen::Matrix<T, Point_T::dimension, Point_T::dimension>
+        computeRotationKabsch(
+          std::vector<Point_T> const & points1,
+          std::vector<Point_T> const & points2);
+
+    };
 }
 
 #include "common.inl"

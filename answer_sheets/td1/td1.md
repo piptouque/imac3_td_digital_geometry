@@ -30,8 +30,8 @@ $$
 ##### Can we exactly calculate the area and perimeter of such Euclidean shapes defined by
 ##### implicit functions? If so, please give their formulas in the report.
 
-We can first compute the intersection of each lines which gives us the vertices of our polygon.
-How we would proceed is, we would compute all the intersections of the lines (there are at most $2n$),
+We can first computeGeometry the intersection of each lines which gives us the vertices of our polygon.
+How we would proceed is, we would computeGeometry all the intersections of the lines (there are at most $2n$),
 then find the closest one to the origin, we'll call it $p_{0}$.
 
 We know that this intersection is a vertex of our polygon, because if it was not there would be
@@ -42,7 +42,7 @@ From there, we choose as $p_{1}$ the intersection with another line such that $p
 This defines the direction of the traversal, and we follow up with the $p_{i}, i \in \llbracket 0, n \rrbracket$.
 
 
-Once we have $(p_{i})_{i \in \llbracket 0, n \rrbracket}$, we can compute the perimeter $L$ of the polygon by the sum of le length of its sides (1-cells).
+Once we have $(p_{i})_{i \in \llbracket 0, n \rrbracket}$, we can computeGeometry the perimeter $L$ of the polygon by the sum of le length of its sides (1-cells).
 By acknowledging:
 
 $$

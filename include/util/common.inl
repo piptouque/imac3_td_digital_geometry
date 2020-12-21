@@ -106,6 +106,47 @@ namespace td::util
             return power<exponent - 1>(val) * val;
         }
     }
+
+    template <typename T>
+    template <class Point_T>
+    [[nodiscard]] inline Eigen::Matrix<T, Point_T::dimension, Point_T::dimension>
+    algorithms<T>::computeRotationKabsch(
+      std::vector<Point_T> const & points1,
+      std::vector<Point_T> const & points2)
+    {
+        // using the Kabsch algorithm
+        // see: https://en.wikipedia.org/wiki/Kabsch_algorithm
+
+        ASSERT(points1.size() == points2.size());
+
+        int constexpr dimension = Point_T::dimension;
+        typedef Eigen::Matrix<T, dimension, dimension> Matrix;
+
+        int const numberPoints = static_cast<int>(points1.size());
+
+        // compute H
+        Eigen::Matrix<T, Eigen::Dynamic, dimension> p, q;
+        p.resize(numberPoints, dimension);
+        q.resize(numberPoints, dimension);
+        // fill p and q
+        for (int i = 0; i < numberPoints; ++i)
+        {
+            p.row(i) = EigenUtility::dgtalPointToColumnVector<Point_T>(points1[i]).transpose().template cast<T>();
+            q.row(i) = EigenUtility::dgtalPointToColumnVector<Point_T>(points2[i]).transpose().template cast<T>();
+        }
+        Matrix h = p.transpose() * q;
+
+        // Since we expect the dimension to be small, we can use JabobiSVD rather than BDCSVD
+        Eigen::JacobiSVD<Matrix> svd;
+        svd.compute(h, Eigen::ComputeFullU | Eigen::ComputeFullV);
+
+        int d = std::signbit((svd.matrixV() * svd.matrixU().transpose()).determinant()) ? -1 : 1;
+        Eigen::DiagonalMatrix<T, dimension> multiplier;
+        multiplier.setIdentity();
+        multiplier.diagonal()[dimension - 1] = static_cast<T>(d);
+
+        return svd.matrixV() * multiplier * svd.matrixU().transpose();
+    }
 }  // namespace td::util
 
 #endif  // TD_UTIL_COMMON_INL

@@ -54,10 +54,6 @@ int
         Image const           image = DGtal::PGMReader<Image>::importPGM(path);
 
         compositeObjects.emplace_back(image);
-        for (auto & component : compositeObjects.back().components)
-        {
-            component.compute();
-        }
     }
 
     for (auto const & composite : compositeObjects)
@@ -196,7 +192,8 @@ int
 
     for (std::size_t i = 10; i < 20; ++i)
     {
-        DGtal::Board2D board = compositeObjects.at(1).components.at(i).draw();
+        DGtal::Board2D board;
+        compositeObjects.at(1).components.at(i).draw(board);
 
         board.saveEPS(std::filesystem::path(outputPath).append("component_" + std::to_string(i) + ".eps").c_str());
     }

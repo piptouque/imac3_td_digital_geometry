@@ -5,31 +5,37 @@
 #ifndef TD_UTIL_DIGITALCOMPONENT_INL
 #define TD_UTIL_DIGITALCOMPONENT_INL
 
-
 // cloning mechanism (deep copy)
 #include <DGtal/base/Clone.h>
 
 #include <util/common.hpp>
+
 namespace td::util
 {
     template <int dimension, class Topology_T>
     inline DigitalComponent<dimension, Topology_T>::DigitalComponent(const DigitalComponent::Object & a_object)
-        : m_object(a_object)
+        : m_object(a_object), m_isSet(false)
     {}
 
     template <int dimension, class Topology_T>
-    DigitalComponent<dimension, Topology_T>::DigitalComponent(DigitalComponent const & component)
-      : m_object(DGtal::Clone(component.m_object)), m_boundary(DGtal::Clone(component.m_boundary)), m_segmentation(),
-        m_omega(DGtal::Clone(component.m_omega))
+    inline DigitalComponent<dimension, Topology_T>::DigitalComponent(DigitalComponent const & component)
+      : m_object(DGtal::Clone(component.m_object)),
+          m_boundary(DGtal::Clone(component.m_boundary)),
+          m_segmentation(),
+        m_omega(DGtal::Clone(component.m_omega)),
+        m_isSet(component.m_isSet)
     {
         m_segmentation.setSubRange(m_boundary.getPointsRange().begin(), m_boundary.getPointsRange().end());
     }
 
 
     template <int dimension, class Topology_T>
-    DigitalComponent<dimension, Topology_T>::DigitalComponent(DigitalComponent && component) noexcept
-      : m_object(std::move(component.m_object)), m_boundary(std::move(component.m_boundary)), m_segmentation(),
-          m_omega(std::move(component.m_omega))
+    inline DigitalComponent<dimension, Topology_T>::DigitalComponent(DigitalComponent && component) noexcept
+      : m_object(std::move(component.m_object)),
+          m_boundary(std::move(component.m_boundary)),
+          m_segmentation(),
+          m_omega(std::move(component.m_omega)),
+          m_isSet(component.m_isSet)
     {
         m_segmentation.setSubRange(m_boundary.getPointsRange().begin(), m_boundary.getPointsRange().end());
     }
@@ -43,25 +49,38 @@ namespace td::util
         m_convexHull = other.m_convexHull;
         m_segmentation.setSubRange(m_boundary.getPointsRange().begin(), m_boundary.getPointsRange().end());
         m_omega = other.m_omega;
+        m_isSet = other.m_isSet;
         return *this;
     }
 
 
     template <int dimension, class Topology_T>
     inline void
-    DigitalComponent<dimension, Topology_T>::compute()
+    DigitalComponent<dimension, Topology_T>::computeGeometry() const
     {
         m_boundary = computeBoundary(m_object);
         m_convexHull = computeConvexHull(m_boundary);
         m_segmentation.setSubRange(m_boundary.getPointsRange().begin(), m_boundary.getPointsRange().end());
         m_omega = computeOmega(m_convexHull);
+
+        // The object is now set!
+        m_isSet = true;
+    }
+
+    template <int dimension, class Topology_T>
+    inline void
+      DigitalComponent<dimension, Topology_T>::computeGeometryIfNotSet() const
+    {
+        if (!m_isSet)
+        {
+           computeGeometry();
+        }
     }
 
     template <int dimension, class Topology_T>
     typename DigitalComponent<dimension, Topology_T>::Point
     DigitalComponent<dimension, Topology_T>::computeOmega(ConvexHull const & convexHull)
     {
-
         // IMPORTANT:
         // Here the coordinates of the objects are relative to the origin of the composite object,
         // which means that the (0, 0) is NOT in the object,
@@ -78,7 +97,7 @@ namespace td::util
 
     template <int dimension, class Topology_T>
     inline typename DigitalComponent<dimension, Topology_T>::Curve
-      DigitalComponent<dimension, Topology_T>::computeBoundary(DigitalComponent::Object const & objectComponent)
+    DigitalComponent<dimension, Topology_T>::computeBoundary(Object const & objectComponent)
     {
         // IMPORTANT:
         // objectComponent() returns a value,
@@ -108,23 +127,24 @@ namespace td::util
         // Even 10_000_000 isn't enough.
 
         // number of tries for stochastic search of a border cell.
-        int constexpr s_numberTries = 100000;
+        int constexpr s_numberTries = 10000000;
         // On second thought, using random.
         // find the boundary cell.
         SCell boundaryCell = DGtal::Surfaces<KSpace>::findABel(kSpace, objectComponent.pointSet(), s_numberTries);
 
         // 2) Call Surfaces::track2DBoundaryPoints to extract the boundary of the object
         DGtal::template Surfaces<KSpace>::track2DBoundaryPoints(boundaryPoints,
-                                                       kSpace,
-                                                       s_adjacency,
-                                                       // DigitalSets are models of PointPredicate, no worries.
-                                                       objectComponent.pointSet(),
-                                                       boundaryCell);
+                                                                kSpace,
+                                                                s_adjacency,
+          // DigitalSets are models of PointPredicate, no worries.
+                                                                objectComponent.pointSet(),
+                                                                boundaryCell);
         Curve boundaryCurve;
         // 3) Create a curve from a vector
         boundaryCurve.initFromPointsVector(boundaryPoints);
         return boundaryCurve;
     }
+
     template <int dimension, class Topology_T>
     typename DigitalComponent<dimension, Topology_T>::ConvexHull
       DigitalComponent<dimension, Topology_T>::computeConvexHull(DigitalComponent::Curve const & boundary)
@@ -164,6 +184,7 @@ namespace td::util
     typename DigitalComponent<dimension, Topology_T>::Area
       DigitalComponent<dimension, Topology_T>::getCountArea() const
     {
+        computeGeometryIfNotSet();
         return static_cast<Area>(m_object.pointSet().size());
     }
 
@@ -171,6 +192,7 @@ namespace td::util
     typename DigitalComponent<dimension, Topology_T>::Area
       DigitalComponent<dimension, Topology_T>::getConvexHullArea() const
     {
+        computeGeometryIfNotSet();
         // see report for first assignment for details.
         // answer_sheets/td1.md
         auto a = static_cast<Area>(0.);
@@ -194,6 +216,7 @@ namespace td::util
     typename DigitalComponent<dimension, Topology_T>::Area
     DigitalComponent<dimension, Topology_T>::getSegmentationArea() const
     {
+        computeGeometryIfNotSet();
         auto a = static_cast<Area>(0.);
         for (auto const & segment : m_segmentation)
         {
@@ -212,6 +235,7 @@ namespace td::util
     typename DigitalComponent<dimension, Topology_T>::Perimeter
       DigitalComponent<dimension, Topology_T>::getCountPerimeter() const
     {
+        computeGeometryIfNotSet();
         return static_cast<Perimeter>(m_boundary.size());
     }
 
@@ -219,6 +243,7 @@ namespace td::util
     typename DigitalComponent<dimension, Topology_T>::Perimeter
       DigitalComponent<dimension, Topology_T>::getConvexHullPerimeter() const
     {
+        computeGeometryIfNotSet();
         // multiply by the surface of each cell.
         auto l  = static_cast<Perimeter>(0.);
         for (auto it = m_convexHull.begin(); it < m_convexHull.end(); ++it)
@@ -237,6 +262,7 @@ namespace td::util
     typename DigitalComponent<dimension, Topology_T>::Area
     DigitalComponent<dimension, Topology_T>::getSegmentationPerimeter() const
     {
+        computeGeometryIfNotSet();
         auto l  = static_cast<Perimeter>(0.);
         for (auto const & segment : m_segmentation)
         {
@@ -253,6 +279,7 @@ namespace td::util
     typename DigitalComponent<dimension, Topology_T>::FloatScalar
       DigitalComponent<dimension, Topology_T>::getCircularity() const
     {
+        computeGeometryIfNotSet();
         // We should use the segmentation to compute area and perimeter,
         // since it is more accurate.
         // See report for the rationale behind this definition.
@@ -265,17 +292,147 @@ namespace td::util
     }
 
     template <int dimension, class Topology_T>
-    inline DGtal::Board2D
-      DigitalComponent<dimension, Topology_T>::draw(Colour const & objectColour,
-                                                    Colour const & boundaryColour,
-                                                    Colour const & segmentColour,
-                                                    Colour const & convexHullColour) const
+    inline
+    typename DigitalComponent<dimension, Topology_T>::Point
+    DigitalComponent<dimension, Topology_T>::getGeometricCentre() const
     {
-        DGtal::Board2D board;
+        // No need to compute an average on the whole shape.
+        // The boundary would give us a good enough approximate.
+        // But it would require to compute it,
+        // and it takes so long it's not worth it..
+        Point sum = Point::zero;
+        // Will most probably overflow here.
+        // Should use dichotomy instead.
+        // We would get an exact result since the coordinates are integers.
+        for (auto const& point : m_object.pointSet())
+        {
+            sum += point;
+        }
+        return sum / static_cast<Integer>(m_object.size());
+    }
 
-        // draw component and boundary
+    template <int dimension, class Topology_T>
+    typename DigitalComponent<dimension, Topology_T>::AngleRadian
+    DigitalComponent<dimension, Topology_T>::computeRotationAngle(
+        std::vector<Point> const & points1,
+        std::vector<Point> const & points2)
+    {
+        // Will use Kabsch for the most accurate result.
+        Matrix rotationMatrix = algorithms<FloatScalar>::computeRotationKabsch<Point>(points1, points2);
+        // will only work in 2D.
+        return std::acos(rotationMatrix(0, 0));
+    }
+
+    template <int dimension, class Topology_T>
+    typename DigitalComponent<dimension, Topology_T>::Perimeter
+    DigitalComponent<dimension, Topology_T>::computeHausdorffDistance(const DigitalComponent & other) const
+    {
+        //
+        return std::max(
+          this->computeFarthestDistance(other),
+          other.computeFarthestDistance(*this)
+        );
+    }
+
+    template <int dimension, class Topology_T>
+    typename DigitalComponent<dimension, Topology_T>::Perimeter
+    DigitalComponent<dimension, Topology_T>::computeDubuissonJainDissimilarity(const DigitalComponent & other) const
+    {
+        //
+        return std::max(
+          this->computeAverageDistance(other),
+          other.computeAverageDistance(*this)
+       );
+    }
+
+    template <int dimension, class Topology_T>
+    typename DigitalComponent<dimension, Topology_T>::Perimeter
+    DigitalComponent<dimension, Topology_T>::computeFarthestDistance(const DigitalComponent<dimension, Topology_T> & other) const
+    {
+        auto it = std::max_element(
+          m_object.pointSet().begin(),
+          m_object.pointSet().end(),
+          [&other](Point const & first, Point const & second) -> bool
+          {
+
+              return other.computeClosestPointDistance(first)
+                     <= other.computeClosestPointDistance(second);
+          }
+          );
+        return other.computeClosestPointDistance(*it);
+    }
+
+    template <int dimension, class Topology_T>
+    typename DigitalComponent<dimension, Topology_T>::Perimeter
+    DigitalComponent<dimension, Topology_T>::computeAverageDistance(const DigitalComponent<dimension, Topology_T> & other) const
+    {
+        int count = 0;
+        return std::accumulate(
+          m_object.pointSet().begin(),
+          m_object.pointSet().end(),
+          static_cast<Perimeter>(0.),
+          [&other, &count](Perimeter average, Point const & point)
+          {
+              average = (average * (count + 1) + other.computeClosestPointDistance(point)) / static_cast<Perimeter>(count);
+              ++count;
+              return average;
+          });
+    }
+
+    template <int dimension, class Topology_T>
+    typename DigitalComponent<dimension, Topology_T>::Perimeter
+    DigitalComponent<dimension, Topology_T>::computeClosestPointDistance(Point const & from) const
+    {
+        // find the min element.
+        auto it = std::max_element(
+          m_object.pointSet().begin(),
+          m_object.pointSet().end(),
+          [&from](Point const & first, Point const & second) -> bool
+          {
+              // return true if first is greater,
+              // in order to have get the minimum element.
+              return (first - from).norm() >= (second - from).norm();
+          }
+          );
+        return (*it - from).norm();
+    }
+
+    template <int dimension, class Topology_T>
+    inline typename DigitalComponent<dimension, Topology_T>::Point
+    DigitalComponent<dimension, Topology_T>::getPositionFromCentre(Point const & point) const
+    {
+        return point - getGeometricCentre();
+    }
+
+    template <int dimension, class Topology_T>
+    inline typename DigitalComponent<dimension, Topology_T>::Vector
+    DigitalComponent<dimension, Topology_T>::getTranslationTo(DigitalComponent const &other) const
+    {
+        return other.getGeometricCentre() - getGeometricCentre();
+    }
+
+    template <int dimension, class Topology_T>
+    void
+    DigitalComponent<dimension, Topology_T>::drawObject(DGtal::Board2D & board, Colour const & objectColour) const
+    {
+        // no need to compute geometry here.
         board << DGtal::CustomStyle(m_object.className(), new DGtal::CustomFillColor(objectColour));
         board << m_object;
+    }
+
+
+        template <int dimension, class Topology_T>
+    void
+      DigitalComponent<dimension, Topology_T>::draw(DGtal::Board2D & board,
+                                                    Colour const &   objectColour,
+                                                    Colour const &   segmentColour,
+                                                    Colour const &   convexHullColour,
+                                                    Colour const &   boundaryColour) const
+    {
+        computeGeometryIfNotSet();
+
+        // draw object and boundary
+        draw(board, objectColour);
         board << DGtal::CustomStyle(m_boundary.className(), new DGtal::CustomFillColor(boundaryColour));
         board << m_boundary;
 
@@ -302,9 +459,8 @@ namespace td::util
             board << DGtal::CustomStyle("ArithmeticalDSS/BoundingBox", new DGtal::CustomPenColor(segmentColour));
             board << segment.primitive();
         }
-
-        return board;
     }
+
 }  // namespace td::util
 
 #endif  // TD_UTIL_DIGITALCOMPONENT_INL
