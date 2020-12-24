@@ -323,57 +323,39 @@ namespace td::util
         return std::acos(rotationMatrix(0, 0));
     }
 
-    template <int dimension, class Topology_T>
-    typename DigitalComponent<dimension, Topology_T>::Perimeter
-    DigitalComponent<dimension, Topology_T>::computeHausdorffDistance(const DigitalComponent & other) const
-    {
-        //
-        return std::max(
-          this->computeFarthestDistance(other),
-          other.computeFarthestDistance(*this)
-        );
-    }
 
     template <int dimension, class Topology_T>
     typename DigitalComponent<dimension, Topology_T>::Perimeter
-    DigitalComponent<dimension, Topology_T>::computeDubuissonJainDissimilarity(const DigitalComponent & other) const
-    {
-        //
-        return std::max(
-          this->computeAverageDistance(other),
-          other.computeAverageDistance(*this)
-       );
-    }
-
-    template <int dimension, class Topology_T>
-    typename DigitalComponent<dimension, Topology_T>::Perimeter
-    DigitalComponent<dimension, Topology_T>::computeFarthestDistance(const DigitalComponent<dimension, Topology_T> & other) const
+    DigitalComponent<dimension, Topology_T>::computeLargestDistance(
+        DistanceTransform const & otherBackgroundDistance) const
     {
         auto it = std::max_element(
           m_object.pointSet().begin(),
           m_object.pointSet().end(),
-          [&other](Point const & first, Point const & second) -> bool
+          [&otherBackgroundDistance](Point const & first, Point const & second) -> bool
           {
-
-              return other.computeClosestPointDistance(first)
-                     <= other.computeClosestPointDistance(second);
+              Perimeter dist1 = otherBackgroundDistance(first);
+              Perimeter dist2 = otherBackgroundDistance(second);
+              return dist1 <= dist2;
           }
           );
-        return other.computeClosestPointDistance(*it);
+        return otherBackgroundDistance(*it);
     }
 
     template <int dimension, class Topology_T>
     typename DigitalComponent<dimension, Topology_T>::Perimeter
-    DigitalComponent<dimension, Topology_T>::computeAverageDistance(const DigitalComponent<dimension, Topology_T> & other) const
+    DigitalComponent<dimension, Topology_T>::computeAverageDistance(
+        DistanceTransform const & otherBackgroundDistance) const
     {
         int count = 0;
         return std::accumulate(
           m_object.pointSet().begin(),
           m_object.pointSet().end(),
           static_cast<Perimeter>(0.),
-          [&other, &count](Perimeter average, Point const & point)
+          [&otherBackgroundDistance, &count](Perimeter average, Point const & point) -> Perimeter
           {
-              average = (average * (count + 1) + other.computeClosestPointDistance(point)) / static_cast<Perimeter>(count);
+              Perimeter dist = otherBackgroundDistance(point);
+              average = (average * count + dist) / static_cast<Perimeter>(count + 1);
               ++count;
               return average;
           });

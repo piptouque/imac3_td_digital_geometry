@@ -10,6 +10,9 @@
 #include <DGtal/topology/SurfelAdjacency.h>
 #include <DGtal/topology/helpers/Surfaces.h>
 
+#include <DGtal/images/IntervalForegroundPredicate.h>
+#include <DGtal/geometry/volumes/distance/DistanceTransformation.h>
+
 #include <DGtal/geometry/curves/GreedySegmentation.h>
 
 
@@ -67,6 +70,17 @@ namespace td::util
         // matrix and vector types
         typedef Eigen::Matrix<FloatScalar, dimension, dimension> Matrix;
 
+        // Image type
+        typedef int ImageValue;
+        typedef typename DGtal::ImageSelector<Domain, ImageValue>::Type Image;
+
+        // Distance transformations
+        int static constexpr c_metricOrder = 2; // L2 metric
+        typedef DGtal::ExactPredicateLpSeparableMetric<Space, c_metricOrder> Metric;
+        typedef DGtal::functors::IntervalForegroundPredicate<Image> Binariser;
+
+        typedef DGtal::DistanceTransformation<Space, Binariser, Metric> DistanceTransform;
+
         // things
         typedef DGtal::Color Colour;
 
@@ -122,15 +136,14 @@ namespace td::util
         [[nodiscard]] inline Vector
         getTranslationTo(DigitalComponent const & other) const;
 
-        [[nodiscard]] Perimeter computeHausdorffDistance(DigitalComponent const & other) const;
-        [[nodiscard]] Perimeter computeDubuissonJainDissimilarity(DigitalComponent const & other) const;
-
         /// Computes geometric centre of the shape.
         /// Called centre of mass in the assigment.
         /// \return geometric centre.
         [[nodiscard]] inline Point
           getGeometricCentre() const;
 
+        [[nodiscard]] Perimeter computeLargestDistance(DistanceTransform const & otherBackgroundDistance) const;
+        [[nodiscard]] Perimeter computeAverageDistance(DistanceTransform const & otherBackgroundDistance) const;
 
         [[nodiscard]] inline bool
           isBorderingRim(Domain const & compositeDomain) const;
@@ -154,8 +167,6 @@ namespace td::util
         computeGeometry() const;
 
         [[nodiscard]] Perimeter computeClosestPointDistance(Point  const & from) const;
-        [[nodiscard]] Perimeter computeFarthestDistance(DigitalComponent const & other) const;
-        [[nodiscard]] Perimeter computeAverageDistance(DigitalComponent const & other) const;
 
         inline void computeGeometryIfNotSet() const;
 

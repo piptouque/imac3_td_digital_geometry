@@ -137,6 +137,10 @@ int
             CompositeObject & firstObject = matCompositeObjects.at(i).at(j);
             CompositeObject & secondObject = matCompositeObjects.at(i).at(j + 1);
 
+            std::cout << "-- BEFORE TRANSFORMATION --" << std::endl;
+            std::cout << "Hausdorff distance:           " << secondObject.computeHausdorffDistance(firstObject) << std::endl;
+            std::cout << "Dubuisson-Jain dissimilarity: " << secondObject.computeDubuissonJainDissimilarity(firstObject) << std::endl;
+
             AngleRadian angle;
             Vector translation;
             {
@@ -169,11 +173,9 @@ int
             std::cout << "Rotation angle: " << angle * (180. / M_PI) << "°" << std::endl;
             std::cout << "Translation:    " << translation << std::endl;
 
-            Component const & firstComponent = firstObject.components.front();
-            Component const & secondComponent = secondObject.components.front();
-
-            std::cout << "Hausdorff distance:           " << secondComponent.computeHausdorffDistance(firstComponent) << std::endl;
-            std::cout << "Dubuisson-Jain dissimilarity: " << secondComponent.computeDubuissonJainDissimilarity(firstComponent) << std::endl;
+            std::cout << "-- AFTER TRANSFORMATION --" << std::endl;
+            std::cout << "Hausdorff distance:           " << secondObject.computeHausdorffDistance(firstObject) << std::endl;
+            std::cout << "Dubuisson-Jain dissimilarity: " << secondObject.computeDubuissonJainDissimilarity(firstObject) << std::endl;
 
             DGtal::Board2D board;
             secondObject.drawObjectComponents(board, Colour::Black, Colour::Yellow);

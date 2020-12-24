@@ -47,13 +47,28 @@ Take a triangle shape with a large height, such that the summit is pointing towa
 
 As such the Debuisson-Jain dissimilarity measure is more robust in the sense that it is less sensible to outlying data because it uses an average, compared to the Hausdorff which uses a superior bound.
 
-Both of these measurements can be done in $\theta(|S||S^\prime|)$ time from their definition.
+Both of these measurements can be done in $\Theta(|S||S_2^\prime|)$ time from their definition.
 
-The Distance transformation, which gives us the distance to the closest point outside of the shape for any point in the shape.
+The Distance transformation, which gives us the distance to the closest point outside of the shape for any point in the shape
+
 $$
-f_y(x) = \inf \limits_{y \in S_2^\prime} d(x, y) \approx
+f_y(x) = \inf \limits_{y \in S_2^\prime} d(x, y) = \max \{d_t(p) \in \R | p \in X \cap Y \}
 $$
 
+We thus have a complexity in $\Theta(\max(|S|, |S_2^\prime|))$
+
+Output of the programme:
+
+    -- BEFORE TRANSFORMATION --
+    Hausdorff distance:           290.126
+    Dubuisson-Jain dissimilarity: 73.9007
+    Rotation angle: 63.669°
+    Translation:    [PointVector] {9, 4}
+    -- AFTER TRANSFORMATION --
+    Hausdorff distance:           26.1725
+    Dubuisson-Jain dissimilarity: 0.586629
+
+The scales of the two measures are different, but we can see that for both of them the distances are lower after the backward transformation.
 
 ![Knife, third](../../assets/td3/output/knife_3.png)
 *Binary image of the knife shape.*

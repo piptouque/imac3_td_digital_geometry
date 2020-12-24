@@ -15,7 +15,9 @@ namespace td::util
 {
     template <int dimension, class Topology_T>
     inline CompositeDigitalObject<dimension, Topology_T>::CompositeDigitalObject(Image const & image)
-        : components(), m_image(image)
+        : components(),
+          m_image(DGtal::Clone(image)),
+          m_backgroundDistanceTransform(computeBackgroundDistanceTransform(m_image))
     {
         // assigning m_image twice, otherwise we get a compilation error.
         reset(image);
@@ -28,6 +30,7 @@ namespace td::util
         m_image = DGtal::Clone(image);
         m_object = computeObject(m_image);
         std::vector<Object> objectComponents = computeObjectComponents(m_object);
+        m_backgroundDistanceTransform        = computeBackgroundDistanceTransform(image);
         components.clear();
         components.reserve(objectComponents.size());
         for (auto const & objectComponent : objectComponents)
@@ -39,11 +42,12 @@ namespace td::util
     }
 
     template <int dimension, class Topology_T>
-    CompositeDigitalObject<dimension, Topology_T>::CompositeDigitalObject(const CompositeDigitalObject & wrapper)
-        : components(wrapper.components),
-          m_image(DGtal::Clone(wrapper.m_image)),
-          m_object(DGtal::Clone(wrapper.m_object)),
-          m_interestPoint(wrapper.m_interestPoint)
+    CompositeDigitalObject<dimension, Topology_T>::CompositeDigitalObject(CompositeDigitalObject const & other)
+        : components(other.components),
+          m_image(DGtal::Clone(other.m_image)),
+          m_object(DGtal::Clone(other.m_object)),
+          m_interestPoint(other.m_interestPoint),
+          m_backgroundDistanceTransform(other.m_backgroundDistanceTransform)
     {
 
     }
@@ -169,9 +173,9 @@ namespace td::util
 
     template <int dimension, class Topology_T>
     inline typename CompositeDigitalObject<dimension, Topology_T>::DistanceTransform
-    CompositeDigitalObject<dimension, Topology_T>::computeDistanceTransform(Image const & image)
+    CompositeDigitalObject<dimension, Topology_T>::computeBackgroundDistanceTransform(Image const & image)
     {
-        Binariser bin (image, 1, 255);
+        Binariser bin (image, -1, 0);
         return DistanceTransform(&image.domain(), &bin, &s_metric);
     }
 
@@ -179,7 +183,7 @@ namespace td::util
     template <int dimension, class Topology_T>
     inline std::vector<typename CompositeDigitalObject<dimension, Topology_T>::Object>
       CompositeDigitalObject<dimension, Topology_T>::computeObjectComponents(
-        const CompositeDigitalObject::Object & object)
+        Object const & object)
     {
         // create output
         std::vector<Object> components;
@@ -189,6 +193,32 @@ namespace td::util
         return components;
     }
 
+
+    template <int dimension, class Topology_T>
+    typename CompositeDigitalObject<dimension, Topology_T>::Perimeter
+    CompositeDigitalObject<dimension, Topology_T>::computeHausdorffDistance(
+      CompositeDigitalObject const & other
+    ) const
+    {
+        //
+        return std::max(
+        this->components.front().computeLargestDistance(other.m_backgroundDistanceTransform),
+          other.components.front().computeLargestDistance(this->m_backgroundDistanceTransform)
+        );
+    }
+
+    template <int dimension, class Topology_T>
+    typename CompositeDigitalObject<dimension, Topology_T>::Perimeter
+    CompositeDigitalObject<dimension, Topology_T>::computeDubuissonJainDissimilarity(
+        CompositeDigitalObject const & other) const
+    {
+        //
+        return std::max(
+          components.front().computeAverageDistance(other.m_backgroundDistanceTransform),
+          other.components.front().computeAverageDistance(this->m_backgroundDistanceTransform)
+        );
+    }
+
     template <int dimension, class Topology_T>
     void
       CompositeDigitalObject<dimension, Topology_T>::cullAllButLargestComponent()
@@ -196,11 +226,11 @@ namespace td::util
         auto const itMax = std::max_element(
           components.begin(),
           components.end(),
-          [](Component const& c1, Component const& c2) -> bool
+          [](Component const & c1, Component const & c2) -> bool
           {
             return c1.getCountArea() <= c2.getCountArea();
           }
-                                           );
+        );
         // keep only the max.
         Component const maxComponent = std::move(*itMax);
         components.clear();

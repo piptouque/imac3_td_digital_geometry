@@ -9,8 +9,6 @@
 
 #include <DGtal/images/RigidTransformation2D.h>
 #include <DGtal/images/ConstImageAdapter.h>
-#include <DGtal/images/IntervalForegroundPredicate.h>
-#include <DGtal/geometry/volumes/distance/DistanceTransformation.h>
 
 #include <optional>
 
@@ -38,8 +36,9 @@ namespace td::util
 
         typedef typename Component::AngleRadian AngleRadian;
 
+        typedef typename Component::Perimeter Perimeter;
         // Image type
-        typedef typename DGtal::ImageSelector<Domain, unsigned char>::Type Image;
+        typedef typename Component::Image Image;
 
         // Rigid transformations
         typedef DGtal::functors::ForwardRigidTransformation2D<Space> ForwardTransform;
@@ -48,12 +47,12 @@ namespace td::util
         typedef DGtal::functors::DomainRigidTransformation2D<Domain, ForwardTransform > DomainTransformer;
         typedef typename DomainTransformer::Bounds Bounds;
 
-        // Distance transformations
-        int static constexpr c_metricOrder = 2; // L2 metric
-        typedef DGtal::ExactPredicateLpSeparableMetric<Space, c_metricOrder> Metric;
-        typedef DGtal::functors::IntervalForegroundPredicate<Image> Binariser;
 
-        typedef DGtal::DistanceTransformation<Space, Binariser, Metric> DistanceTransform;
+        // Distance transformations
+        typedef typename Component::Metric Metric;
+        typedef typename Component::Binariser Binariser;
+
+        typedef typename Component::DistanceTransform DistanceTransform;
 
         // other
         typedef DGtal::Color Colour;
@@ -62,9 +61,9 @@ namespace td::util
         // c-tor
         inline explicit CompositeDigitalObject(Image const & image);
 
-        inline CompositeDigitalObject(CompositeDigitalObject const & wrapper);
+        inline CompositeDigitalObject(CompositeDigitalObject const &);
         // And for some reason it does not compile if I mark this as noexcept..
-        inline CompositeDigitalObject(CompositeDigitalObject && wrapper) = default;
+        inline CompositeDigitalObject(CompositeDigitalObject &&) = default;
 
         /// Set custom interest point. Will be transformed with the object.
         /// \param interestPoint
@@ -80,6 +79,8 @@ namespace td::util
           transformRigidBackward(RealPoint const & rotCentre, AngleRadian angle, RealVector const & translation);
 
 
+        [[nodiscard]] Perimeter computeHausdorffDistance(CompositeDigitalObject const & other) const;
+        [[nodiscard]] Perimeter computeDubuissonJainDissimilarity(CompositeDigitalObject const & other) const;
 
         inline void
         drawObjectComponents(DGtal::Board2D & board,
@@ -97,7 +98,7 @@ namespace td::util
         [[nodiscard]] inline static Object
           computeObject(Image const & image);
         [[nodiscard]] inline static DistanceTransform
-          computeDistanceTransform(Image const & image);
+          computeBackgroundDistanceTransform(Image const & image);
         /// Removes the components whose set of points include a border point.
         /// \param components
         void
@@ -109,6 +110,7 @@ namespace td::util
         Object m_object;
         // Point of interest (optional)
         std::optional<Point> m_interestPoint;
+        DistanceTransform    m_backgroundDistanceTransform;
         // Topology object
         inline static DigitalTopology const s_topology = DGtal::Z2i::dt4_8;
         // Metric object
